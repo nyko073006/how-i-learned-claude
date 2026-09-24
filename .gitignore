@@ -1,0 +1,15 @@
+# Handoffs sind Session-Zustand, kein Inhalt (Regel in claude-md/CLAUDE.md, Kontext-Cap)
+HANDOFF-*.md
+handoffs/
+.planning/
+
+# Kursmaterial und Account-Screenshots
+*.png
+*.jpg
+
+# macOS
+.DS_Store
+
+# nie versionieren
+.env
+*.bak*
