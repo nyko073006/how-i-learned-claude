@@ -39,8 +39,8 @@ Stand Skool = Fortschrittsbalken im Classroom am 2026-09-24. Reihenfolge nach Nu
 | 3 | Skills, MCPs, Plugins - Plug & Play (Phase 02) | 100 % | erledigt, kein Abend | | [[Kurs-Notizen/Modul 3 - Skills MCPs Plugins]] | |
 | 4 | Templates, Skills, MCPs Library: Setup-Guides und Plugins des Anbieters | 0 % | Nachschlagewerk, kein Abend | | | |
 | 9 | Viral AI Content System: Content-Pipelines, +20k Follower in 3 Monaten (Phase 06) | 0 % | zurueckgestellt, nicht in den Lernzielen | | | |
-| 1 | (Titel nachtragen, oberste Reihe im Screenshot abgeschnitten) | ? | offen | | | |
-| 2 | (Titel nachtragen, oberste Reihe im Screenshot abgeschnitten) | ? | offen | | | |
+| 1 | (Titel nachtragen, oberste Reihe im Screenshot abgeschnitten) | 100 % | erledigt, kein Abend | | | |
+| 2 | (Titel nachtragen, oberste Reihe im Screenshot abgeschnitten) | 100 % | erledigt, kein Abend | | | |
 
 ### Zusatzbereiche im Classroom (kein Lernplan-Slot)
 
@@ -60,5 +60,6 @@ Stand Skool = Fortschrittsbalken im Classroom am 2026-09-24. Reihenfolge nach Nu
 
 - [x] Kursname und Anbieter eingetragen (2026-09-24)
 - [x] Modulliste aus dem Classroom eingetragen, Abende verteilt (2026-09-24)
-- [ ] Titel und Stand von Modul 1 und 2 nachtragen (oberste Reihe im Screenshot abgeschnitten)
+- [x] Stand von Modul 1 und 2: beide abgeschlossen (Angabe vom 2026-09-24)
+- [ ] Titel von Modul 1 und 2 nachtragen (oberste Reihe im Screenshot abgeschnitten)
 - [ ] Nach Abend 1: Regel-Kandidaten aus Modul 5 gegen die Betriebsregeln in `~/.claude/CLAUDE.md` halten
