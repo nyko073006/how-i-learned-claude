@@ -3,7 +3,7 @@ tags:
   - claude-code
   - lernplan
 status: aktiv
-aktualisiert: 2026-09-24
+aktualisiert: 2026-09-27
 source: claude
 chat_url: unbekannt
 ---
@@ -62,4 +62,4 @@ Stand Skool = Fortschrittsbalken im Classroom am 2026-09-24. Reihenfolge nach Nu
 - [x] Modulliste aus dem Classroom eingetragen, Abende verteilt (2026-09-24)
 - [x] Stand von Modul 1 und 2: beide abgeschlossen (Angabe vom 2026-09-24)
 - [ ] Titel von Modul 1 und 2 nachtragen (oberste Reihe im Screenshot abgeschnitten)
-- [ ] Nach Abend 1: Regel-Kandidaten aus Modul 5 gegen die Betriebsregeln in `~/.claude/CLAUDE.md` halten
+- [ ] Nach Abend 1: Regel-Kandidaten aus Modul 5 gegen die Betriebsregeln in `~/.claude/CLAUDE.md` halten. Teilweise vorgezogen am 2026-09-27 ueber den Workshop, siehe [[Kurs-Notizen/Workshop - Claude Setup]]
