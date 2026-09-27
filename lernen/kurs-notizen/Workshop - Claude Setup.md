@@ -44,12 +44,13 @@ Kein Kursmodul, sondern der 90-Minuten-Live-Workshop des Kursanbieters. Inhaltli
 | Caveman-Skill | Nicht installiert. Drittanbieter, Zahlen (45 bis 87 Prozent kuerzer) vom Presenter bzw. Entwickler. Steht gegen den offenen Punkt "Skills ausduennen". |
 | Context Mode | Nicht installiert. Drittanbieter, Installation per kopiertem Prompt von context.scale.de: Prompt vorher lesen. Zahlen (3 Stunden laenger, 98 Prozent weniger Daten) vom Entwickler. |
 | Terminal statt App | Offen. Passt zum Retro-Log: In VS Code gewinnt der Picker ueber settings.json. |
-| Kontext in Prozent sehen | Offen: `/statusline` einrichten, dann ist der 150k-Cap sichtbar statt geschaetzt. |
+| Kontext in Prozent sehen | Eingerichtet am 2026-09-27: Statusline mit k-Tokens, Prozent und HANDOFF ab 150k, siehe `settings/2026-09-27-settings-aenderungen.md`. |
 
 ## Was aendert sich an meinem Setup
 
 - Neue Regel in der CLAUDE.md, Abschnitt Kontext-Cap: PDFs vorher mit Markitdown in Markdown umwandeln.
-- Kandidaten zum Testen, je einzeln und mit Messung per `/usage`: Statusline mit Kontext-Prozent, Terminal statt VS Code, hoechstens eins von Caveman oder Context Mode.
+- Statusline mit Kontextanzeige eingerichtet (nur im Terminal sichtbar).
+- Kandidaten zum Testen, je einzeln und mit Messung per `/usage`: Terminal statt VS Code, hoechstens eins von Caveman oder Context Mode.
 
 ## Regel-Kandidat
 
