@@ -3,7 +3,7 @@ tags:
   - claude-code
   - kurs-notiz
 status: aktiv
-aktualisiert: 2026-09-27
+aktualisiert: 2026-09-29
 source: claude
 chat_url: unbekannt
 ---
@@ -37,11 +37,11 @@ Kein Kursmodul, sondern der 90-Minuten-Live-Workshop des Kursanbieters. Inhaltli
 
 | Tipp | Stand |
 |---|---|
-| Handoff und `/clear` | Vorhanden: Kontext-Cap 150k, Skill `session-uebergabe`, clearable-Regel |
+| Handoff und `/clear` | Vorhanden: Kontext-Cap 150k, Skill `handoff` (bis 2026-09-29 `session-uebergabe`), clearable-Regel |
 | CLAUDE.md unter 200 Zeilen | Vorhanden: 122 Zeilen |
 | .md statt PDF | Neu, als Regel uebernommen (siehe unten) |
 | Modell passend zur Aufgabe | Vorhanden: Opus Lead, Sonnet Sub-Agents, Fable auf Zuruf. Das Workshop-Beispiel (Wochenlimit in 8 Stunden weg, alles lief ueber das teuerste Modell) ist meine Ausgangslage vom 2026-09-24. |
-| Caveman-Skill | Nicht installiert. Drittanbieter, Zahlen (45 bis 87 Prozent kuerzer) vom Presenter bzw. Entwickler. Steht gegen den offenen Punkt "Skills ausduennen". |
+| Caveman-Skill | Korrektur 2026-09-29: war installiert (`caveman` plus Varianten und die deutsche Fassung `hoehlenmensch`), aber kaum genutzt. Beim Ausduennen bleibt nur `hoehlenmensch`, die englische Familie ist archiviert. Offen: `hoehlenmensch` besser in den Alltag integrieren. Zahlen (45 bis 87 Prozent kuerzer) vom Presenter bzw. Entwickler. |
 | Context Mode | Nicht installiert. Drittanbieter, Installation per kopiertem Prompt von context.scale.de: Prompt vorher lesen. Zahlen (3 Stunden laenger, 98 Prozent weniger Daten) vom Entwickler. |
 | Terminal statt App | Offen. Passt zum Retro-Log: In VS Code gewinnt der Picker ueber settings.json. |
 | Kontext in Prozent sehen | Eingerichtet am 2026-09-27: Statusline mit k-Tokens, Prozent und HANDOFF ab 150k, siehe `settings/2026-09-27-settings-aenderungen.md`. |
@@ -50,7 +50,7 @@ Kein Kursmodul, sondern der 90-Minuten-Live-Workshop des Kursanbieters. Inhaltli
 
 - Neue Regel in der CLAUDE.md, Abschnitt Kontext-Cap: PDFs vorher mit Markitdown in Markdown umwandeln.
 - Statusline mit Kontextanzeige eingerichtet (nur im Terminal sichtbar).
-- Kandidaten zum Testen, je einzeln und mit Messung per `/usage`: Terminal statt VS Code, hoechstens eins von Caveman oder Context Mode.
+- Kandidaten zum Testen, je einzeln und mit Messung per `/usage`: Terminal statt VS Code, `hoehlenmensch` gezielt einsetzen statt zusaetzlich Context Mode.
 
 ## Regel-Kandidat
 
