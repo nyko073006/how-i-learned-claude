@@ -4,7 +4,7 @@ tags:
   - claude-md
   - changelog
 status: aktiv
-aktualisiert: 2026-09-27
+aktualisiert: 2026-09-29
 source: claude
 chat_url: unbekannt
 ---
@@ -19,3 +19,4 @@ Massgeblich ist ausschliesslich `~/.claude/CLAUDE.md`. Hier steht nur, was sich 
 | 2026-09-24 (2) | Kontext-Cap: Bei automatisch ausgeloestem Handoff sagt die Session, dass sie clearable ist; jede clearable Session fordert ausdruecklich zum `/clear` auf. Definition von clearable ergaenzt. | Nutzer will ein eindeutiges Signal, wann eine Session gewiped werden kann. | [[History/2026-09-24-2]] |
 | 2026-09-24 (3) | Kontext-Cap: Handoff-Dateien stehen in Git-Projekten immer in der `.gitignore`; fehlender Eintrag wird beim Handoff angelegt. | Handoffs sind Session-Zustand, kein Projektinhalt; sollen nicht ins Repo. | [[History/2026-09-24-3]] |
 | 2026-09-27 | Kontext-Cap: PDFs vor dem Einlesen mit Markitdown in Markdown umwandeln; scheitert die Umwandlung, sage ich es vorher. | Workshop Skaile Academy: 20-seitige PDF kostet laut Presenter mind. 50k Tokens, als `.md` rund 12k. Vom Nutzer bestaetigt. | [[History/2026-09-27]] |
+| 2026-09-29 | Kontext-Cap: Handoff-Skill `session-uebergabe` durch `handoff` ersetzt. | Skills ausgeduennt (96 auf 47): `session-uebergabe` war doppelt zu `handoff` und ist archiviert, der umfangreichere `handoff` bleibt. Vom Nutzer bestaetigt. | [[History/2026-09-29]] |
