@@ -22,7 +22,7 @@ Ziel: Wochenlimit halten und Qualitaet hoch halten. Beides haengt am selben Hebe
 - Handoff-Dateien (`handoffs/`, `HANDOFF-*.md`, `.planning/`-Handoffs) stehen in Git-Projekten immer in der `.gitignore`. Fehlt der Eintrag, lege ich ihn beim Schreiben des Handoffs an und sage es. Ausnahme nur, wenn der Nutzer das Handoff ausdruecklich versioniert haben will.
 
 ### Effort
-- Standard ist `medium`. `xhigh` und `ultracode` nur, wenn der Nutzer es fuer die konkrete Aufgabe verlangt (Wort `ultracode` im Prompt oder `/effort`).
+- Standard ist `high` fuer Opus (Lead-Session) und `medium` fuer alle anderen Modelle, also auch fuer die Sonnet-Sub-Agents. Gesetzt in `~/.claude/settings.json` (`modelSettings.claude-opus-5-5.effortLevel` bzw. `effortLevel`). `xhigh` und `ultracode` nur, wenn der Nutzer es fuer die konkrete Aufgabe verlangt (Wort `ultracode` im Prompt oder `/effort`).
 - Laeuft die Session auf Ultracode oder xhigh, ohne dass die Aufgabe es verlangt, sage ich das zu Session-Beginn einmal und frage, ob das gewollt ist.
 
 ### Modell
