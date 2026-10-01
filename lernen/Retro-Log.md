@@ -3,7 +3,7 @@ tags:
   - claude-code
   - retro
 status: aktiv
-aktualisiert: 2026-09-24
+aktualisiert: 2026-10-01
 source: claude
 chat_url: unbekannt
 ---
@@ -11,6 +11,41 @@ chat_url: unbekannt
 # Retro-Log Arbeitsweise Claude Code
 
 Datierte Eintraege, was an Regeln oder Settings geaendert wurde, warum, und ob es gewirkt hat. Neueste Eintraege oben.
+
+## 2026-10-01 Wirkungskontrolle nach einer Woche
+
+### Gemessen
+
+`/usage` am 2026-10-01, 08:40, einen Tag vor dem Reset (2026-10-02, 07:00):
+
+| Zeile | Stand |
+|---|---|
+| Wochenlimit, alle Modelle | 65 % |
+| Wochenlimit, Fable 5.1 | 88 % |
+| Anfragen | 804 in 24 h, 6.758 in 7 Tagen |
+
+Angaben des Nutzers: ueberwiegend im Terminal gearbeitet, Kontext seit der Regel nie ueber 300k, Handoff viel genutzt, PDF-Regel noch nicht gebraucht.
+
+### Hat gewirkt
+
+- Wochenlimit nicht gerissen, einen Tag vor dem Reset bei 65 %. Vorher regelmaessig gerissen. Fuer den Nutzer ein voller Erfolg.
+- Kein Kontext mehr ueber 300k, vorher Sessions bis 90 MB Transkript. Kontext-Cap, Handoff und Statusline greifen.
+- Fable 88 % war bewusste Nutzung, kein Ausreisser durch den VS-Code-Picker.
+
+### Nicht messbar oder offen
+
+- PDF-Regel: noch kein Anlass, keine Aussage.
+- Skills 96 auf 47 (2026-09-29): erst zwei Tage aktiv, Wirkung naechste Woche.
+- Die Regel "Opus-Zeile donnerstags ueber 60 Prozent" passt nicht zu `/usage`: Es gibt keine eigene Opus-Zeile, nur "alle Modelle" und eine Zeile pro Modell wie Fable. Mit 65 % in "alle Modelle" waere die Regel formal gerissen, obwohl die Woche ein Erfolg war. Schwelle und Zeile neu festlegen, Entscheidung offen.
+- Diese Cloud-Session lief vom 2026-09-27 bis 2026-10-01 ueber mehrere Auftraege (Workshop, Statusline, Skills, Retro). Stand am 01.10.: 5,1 Mio. Tokens Cache-Read, 22 $. Verstoesst gegen "ein Auftrag pro Session". Lehre: auch Cloud-Sessions nach jedem Auftrag uebergeben.
+
+### Geaendert
+
+- Modell-Regel in der CLAUDE.md: Jede Session sagt zu Beginn ihr Modell an und fragt bei Fable ohne Zuruf einmal nach. Siehe [[Changelog]].
+
+### Naechste Messung
+
+- 2026-10-08 per `/usage`. Fokus: Wirkung der ausgeduennten Skills, Entscheidung zur 60-Prozent-Regel.
 
 ## 2026-09-24 Wirkungskontrolle nach dem Umbau (Abend)
 
