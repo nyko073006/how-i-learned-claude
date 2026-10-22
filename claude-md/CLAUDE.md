@@ -1,123 +1,232 @@
 # Globale Claude Code Regeln
 
-Gilt fuer alle Projekte auf diesem Mac. KI-agnostische Regeln (Vault-Struktur, Projekte, Daily Notes, Research) stehen in der Vault-CLAUDE.md, sie ist die Single Source of Truth fuer alle KIs:
-`/Users/nyko/Documents/Claude-Projekte/SecondBrain/CLAUDE.md`
-Hier stehen nur Regeln, die Claude Code selbst betreffen.
+Gilt fuer alle Projekte. KI-Regeln stehen in Vault, Single Source of Truth fuer
+alle KIs: `~/Documents/Claude-Projekte/SecondBrain/CLAUDE.md`. Hier
+steht nur, was Claude Code selbst betrifft.
 
 ## Sprache
 
-Alle Kommunikation, Dokumentation und Skills auf Deutsch.
+Alles komplett auf Deutsch.
 
 ## Betriebsregeln Claude Code
 
-Ziel: Wochenlimit halten und Qualitaet hoch halten. Beides haengt am selben Hebel: kleiner Kontext, passende Effort-Stufe, keine unnoetigen Agenten.
+Ziel: Alle Limits halten und Qualitaet hoch halten. Hebel: kleiner Kontext,
+passender Effort, nichts unnoetiges.
 
-### Kontext-Cap 150k
-- Ein Auftrag pro Session. Ist der Auftrag fertig, folgt der Handoff (Skill `handoff` oder Daily Note), danach `/clear`.
-- Ab etwa 150k Tokens Kontext schreibe ich von mir aus einen Handoff und schlage eine neue Session vor, auch mitten in der Arbeit. Grosse Aufgaben werden bei hohem Kontext nicht durchgezogen, sondern uebergeben.
-- Grosse Dateien nie komplett lesen, wenn ein Ausschnitt reicht. Lange Tool-Ausgaben gehen in Dateien im Scratchpad, nicht in den Kontext.
-- PDFs nie direkt einlesen. Vorher mit Markitdown (`markitdown datei.pdf -o datei.md`) in Markdown umwandeln und mit der `.md` arbeiten. Scheitert die Umwandlung (Scan ohne Textebene, kaputte Tabellen), sage ich das, bevor ich doch die PDF lese.
-- Loest die Session den Handoff automatisch aus (Kontext-Cap erreicht), sagt sie im selben Atemzug, dass sie clearable ist.
-- Clearable heisst: Handoff und Daily Note sind geschrieben, nichts Ungesichertes ist mehr offen. Jede clearable Session sagt ausdruecklich, dass der Nutzer sie mit `/clear` wipen soll. Ohne diesen Satz gilt die Session als nicht uebergeben.
-- Handoff-Dateien (`handoffs/`, `HANDOFF-*.md`, `.planning/`-Handoffs) stehen in Git-Projekten immer in der `.gitignore`. Fehlt der Eintrag, lege ich ihn beim Schreiben des Handoffs an und sage es. Ausnahme nur, wenn der Nutzer das Handoff ausdruecklich versioniert haben will.
+### Kontext-Cap 175k
+
+- Ein Auftrag pro Session. Handoff, dann `/clear`. Aber fruehestens ab 10 %
+  Kontext (`used_percentage` der Statuszeile) und ab der zweiten eigenen
+  Nachricht des Nutzers in der Session: Darunter laeuft der naechste Auftrag in
+  derselben Session weiter, ohne Handoff, Startnachricht und `/clear`-Satz.
+  Beide Schwellen stellt der Nutzer im Cockpit ein; massgeblich sind
+  `clearable_min_context_pct` und `clearable_min_prompts` in
+  `~/.claude/cockpit/thresholds.json`, fehlen sie, gelten 10 % und 2.
+- Ab 175k Kontext schreibe ich einen Handoff und schlage eine neue Session vor.
+  Grosse Aufgaben bei hohem Kontext uebergeben statt durchziehen.
+- Lange Tool-Ausgaben in Dateien im Scratchpad, nicht in den Kontext.
+- PDFs nie direkt einlesen, erst `markitdown datei.pdf -o datei.md`. Scheitert
+  das, sage ich es, bevor ich doch die PDF lese.
+- Clearable heisst: Handoff und Daily Note geschrieben, nichts Ungesichertes
+  offen. Jede clearable Session sagt ausdruecklich, dass der Nutzer sie mit
+  `/clear` wipen soll; beim automatisch ausgeloesten Handoff im selben Atemzug.
+  Ohne diesen Satz gilt die Session als nicht uebergeben.
+- Dazu als letztes im Beitrag ein eigener Codeblock mit der Startnachricht fuer
+  den naechsten Chat: zwei bis vier Zeilen, Handoff-Pfad, naechster Auftrag,
+  offene Entscheidungen, keine Zusammenfassung des Erledigten. Ohne diesen Block
+  ist die Uebergabe nicht fertig.
+- Handoff-Dateien stehen in Git-Projekten immer in der `.gitignore`; fehlt der
+  Eintrag, lege ich ihn an und sage es. Ausnahme nur auf ausdruecklichen Wunsch.
+
+### Befehle zum Kopieren
+
+- Alles, was der Nutzer ausfuehren oder einfuegen soll (Terminal-Befehle,
+  `obsidian eval`-Ausdruecke, Konfigurationswerte, einzufuegende Pfade), steht
+  in einem eigenen Codeblock: ein Befehl pro Zeile, ohne Umbruch, ohne `\` am
+  Zeilenende. Nie inline im Fliesstext oder in einem Listenpunkt. Grund: Das
+  Terminal bricht lange Zeilen hart um, markierter Text bringt Umbrueche und
+  Einrueckung mit; die Codeblock-Leiste des Cockpits kopiert den Block sauber.
 
 ### Effort
-- Standard ist `high` fuer Opus (Lead-Session) und `medium` fuer alle anderen Modelle, also auch fuer die Sonnet-Sub-Agents. Gesetzt in `~/.claude/settings.json` (`modelSettings.claude-opus-5-5.effortLevel` bzw. `effortLevel`). `xhigh` und `ultracode` nur, wenn der Nutzer es fuer die konkrete Aufgabe verlangt (Wort `ultracode` im Prompt oder `/effort`).
-- Laeuft die Session auf Ultracode oder xhigh, ohne dass die Aufgabe es verlangt, sage ich das zu Session-Beginn einmal und frage, ob das gewollt ist.
+
+- Standard `high` fuer Opus (Lead), `medium` fuer alle anderen Modelle inkl.
+  Sonnet-Sub-Agents. Gesetzt in `~/.claude/settings.json`
+  (`modelSettings.claude-opus-5-5.effortLevel` bzw. `effortLevel`). `xhigh` und
+  `ultracode` nur, wenn der Nutzer es fuer die Aufgabe verlangt (`ultracode` im
+  Prompt oder `/effort`).
 
 ### Modell
-- Lead-Session: Opus. Sub-Agents: Sonnet. Fable nur auf Zuruf fuer Architektur, Review und harte Debugging-Faelle.
-- Zu Beginn jeder Session sage ich in einem Satz, auf welchem Modell sie laeuft. Laeuft sie auf Fable, ohne dass der Nutzer Fable fuer diese Aufgabe verlangt hat, frage ich einmal nach, ob das gewollt ist. Bewusste Fable-Nutzung ist in Ordnung. Der Picker in VS Code gewinnt pro Session ueber die Settings.
+
+- Lead: Opus. Sub-Agents: Sonnet. Fable nur auf Zuruf fuer Architektur, Review
+  und harte Debugging-Faelle.
+- Zu Beginn jeder Session nenne ich in einem Satz das Modell.
 
 ### Sub-Agents und Workflows
-- Standard ist linear: Ich arbeite selbst, wenn die Aufgabe eine Datei, eine Frage oder eine Recherche mit klarer Fundstelle ist.
-- Sub-Agents ab zwei unabhaengigen Teilen, oder wenn mehr als etwa fuenf Dateien gelesen werden muessen, deren Inhalt ich danach nicht selbst brauche. Sub-Agents laufen auf Sonnet.
-- Fuer wiederkehrende Rollen nutze ich die eigenen Agenten in `~/.claude/agents/nyko/`, statt die Rolle jedes Mal neu in den Prompt zu tippen: `skeptiker` (eine Aenderung oder Behauptung widerlegen statt bestaetigen), `repo-inventur` (read-only Bestandsaufnahme), `beleg-sucher` (Fundstelle in Handbuch oder Doku), `web-rechercheur` (Web-Recherche mit Quellenpflicht), `task-reviewer` (fertige Umsetzung gegen ihren Plan pruefen). Alle laufen auf Sonnet; die vier read-only haben kein `Write` und kein `Edit`. Die fremd installierten Agenten aus `claude-flow` nutze ich nicht.
-- Workflows (Multi-Agent-Orchestrierung) nur, wenn der Nutzer sie ausdruecklich verlangt.
-- Jeder Sub-Agent bekommt ein Mini-Briefing: Rolle, Kontext (welche Dateien, was er wissen muss), konkrete Aufgabe, erwartetes Ergebnisformat. Kein "sortiere das aus dem Chat heraus".
-- Ergebnisse von Sub-Agents pruefe ich, bevor ich sie als Fakt weitergebe.
-- Verfuegbare Skills erkenne ich selbst und setze sie gezielt ein; der Nutzer nennt optional gewuenschte Skills.
 
-### Wochenlimit
-- Der Nutzer prueft montags und donnerstags `/usage`. Liegt die Opus-Zeile donnerstags ueber 60 Prozent, laeuft der Rest der Woche auf Sonnet.
-- Kostet eine Aufgabe voraussichtlich mehr als 200k Tokens, sage ich das vor dem Start.
+- Standard linear: Ich arbeite selbst bei einer Datei, einer Frage oder einer
+  Recherche mit klarer Fundstelle.
+- Sub-Agents (Sonnet) ab zwei unabhaengigen Teilen oder wenn mehr als vier
+  Dateien zu lesen sind, deren Inhalt ich danach nicht selbst brauche.
+- Planimplementierungen laufen immer und ausnahmslos subagent-driven
+  (`superpowers:subagent-driven-development`), auch bei kleinen Plaenen und
+  unter den Schwellen oben. Keine Rueckfrage nach der Ausfuehrungsart.
+  Umsetzung und Fix-Runden macht `umsetzer`, Review und Re-Review
+  `task-reviewer`, statt `general-purpose` aus den Skill-Vorlagen. Ein
+  staerkeres Modell (Fix-Runde 4-5, Abschlussreview) per `model`-Parameter.
+  Parallel zum ersten Task-Review prueft `agy` (Modus pruefen, Gemini) den
+  Diff des Tasks, damit eine andere Modellfamilie gegenliest; seine
+  nachgeprueften Befunde zaehlen wie Review-Befunde. Faellt der Task unter
+  die Datengrenze aus `~/.claude/fremdmodelle/regeln.md`, entfaellt das. Im
+  Workflow `sdd-aufgabe` ist das die Standard-Linse.
+- Fuer wiederkehrende Rollen die eigenen Agenten in `~/.claude/agents/nyko/`
+  statt Rollentext im Prompt: `skeptiker`, `repo-inventur`, `beleg-sucher`,
+  `web-rechercheur`, `task-reviewer`, `umsetzer` (alle Sonnet, nur
+  `umsetzer` und `web-rechercheur` schreiben). `general-purpose` nur, wenn
+  kein eigener Agent passt.
+- Persona-Agenten `stefan`, `manfred`, `forensicmedia`, `dieper`, `kevin`,
+  `holger`: Rolle, Ausloeser, Werkzeuge und Verhalten stehen in ihren
+  Agent-Dateien, deren Beschreibungen in jeder Session geladen sind. Direkt
+  startbar mit `claude --agent <name>`. Fuer mich als Lead gilt zusaetzlich:
+  - `stefan`: Seine Antwort gebe ich unveraendert weiter.
+  - `dieper`: Ich rufe ihn selbststaendig auf, wenn eine Aufgabe sonst flach
+    bliebe (Recherche aus Zweitquellen, Fachfragen, Analyse ohne
+    Pruefinstanz, Specs, Entscheidungen mit Tragweite), arbeite dann nach
+    seinem vertieften Auftrag und sage das in einem Satz. Nicht bei Kleinkram.
+  - `kevin`: Agent-Datei bleibt ohne `model`-Feld, damit er direkt gestartet
+    mit dem Lead-Modell laeuft.
+- `codex` und `agy`: gemeinsame Regeln in `~/.claude/fremdmodelle/regeln.md`. Modus
+  pruefen (Standard, nur lesen) fuer Zweitmeinungen zu Diff, Plan oder Spec,
+  vor allem `agy` mit Gemini 3.8 Flash (kostenlos, andere Modellfamilie).
+  `agy` nur pruefen, nie umsetzen: Sein Claude-Wochenlimit ist knapp. Modus
+  umsetzen nur `codex`, im Worktree unter Sandbox, um Claude-Kontingent zu
+  schonen; Codex laeuft im ChatGPT-Gratistarif. Nie fuer dienstliche Daten, Sozialdaten,
+  Finanzakte, Finanzen, `.env` oder Secrets: Das geht an OpenAI bzw.
+  Google. Ergebnisse pruefe ich wie jede Sub-Agent-Ausgabe.
+- Multi-Agent-Orchestrierung, also workflows, auf nachfrage starten
+- Jeder Sub-Agent bekommt ein Mini-Briefing: Ergebniswunsch, Rolle, Kontext
+  (Dateien, noetiges Wissen), konkrete Aufgabe.
+- Ergebnisse von Sub-Agents (auch Stefan und Manfred) pruefe ich, bevor ich sie
+  als Fakt weitergebe.
+
+### Commands, Skills, Loops
+
+- Vorhandene Commands und Skills nutze ich aktiv; passende erkenne ich selbst,
+  der Nutzer nennt optional gewuenschte.
+- Wiederholt sich ein Ablauf (ab dem zweiten Mal), lege ich selbst einen
+  Command (`~/.claude/commands/`) oder Skill an und sage es. Vorher pruefen, ob
+  es ihn schon gibt. Skills nach Skill-Lifecycle.
+- Was regelmaessig wiederkehrt, laeuft als Loop (`/loop`, `/schedule`, launchd)
+  statt von Hand. Was sich vereinfachen laesst, vereinfache ich (Skript, Alias,
+  Hook).
+
+### Schaetzwerte
+
+Gemessen am 21.10.2026 ueber 76 aktive Tage (Details und Skript:
+`03 Bereiche/Claude Code/Output-Kennzahlen.md` im Vault). Schaetzungen rechnen
+mit dem Median; p90 ist die Tagesobergrenze, der Rekord kein Planwert.
+
+- Mediantag: rund 1.100 Zeilen Code netto, 800k Output-Tokens, 2-3 Sessions.
+  Session im Schnitt 150k Output-Tokens.
+- p90-Tag: 5.000 bis 6.500 Zeilen, 4,5 Mio. Output-Tokens. Rekord: 24.000
+  Zeilen (11.08.2026), 9,3 Mio. Tokens (18.10.2026).
+- Seit 04.10. (subagent-driven): Median 3,5 Mio., p90 7,7 Mio. Output-Tokens
+  pro aktivem Tag.
+- Faustregel je 1.000 Zeilen netto, Tests, Doku und Denken eingerechnet:
+  subagent-driven (Umsetzer, Reviews, agy) rund 1,7 Mio. Output-Tokens, linear
+  ohne Review-Runden rund 400k.
 
 ## Arbeitsregeln Code
 
-- IMMER Read vor Edit: Datei erst lesen, dann aendern
-- IMMER Edit vor Write: bestehende Dateien editieren, nicht ueberschreiben. Ausnahme: Die Datei wird bewusst komplett neu geschrieben und vorher archiviert.
-- KEINE neuen Dateien erstellen, wenn eine bestehende erweitert werden kann
-- Fertig heisst verifiziert: Tests gelaufen, Ausgabe gezeigt. Ein Fund gilt erst, wenn ein Gegentest, der das Gegenteil behauptet, rot wird.
+- Immer Read vor Edit, Edit vor Write. Komplett neu schreiben nur bewusst und
+  nach Archivierung.
+- Keine neuen Dateien, wenn eine bestehende erweitert werden kann.
+- Vor dem Selbstbauen suche ich nach bestehenden, geprueften Bibliotheken
+  (gepflegt, verbreitet) und nutze sie, statt alles von null aufzubauen. Selbst
+  gebaut wird nur, wenn keine passt.
+- Fertig heisst verifiziert: Tests gelaufen, Ausgabe gezeigt. Ein Fund gilt
+  erst, wenn ein Gegentest, der das Gegenteil behauptet, rot wird.
+
+## Fehler und Memory
+
+- Fehler und Probleme dokumentiere ich immer projektbezogen in `Fehlerlog.md`
+  im Projektordner (`02 Projekte/<Projekt>/`, bei Bereichen
+  `03 Bereiche/<Bereich>/`), verlinkt im Hub. Je Eintrag Datum, was passiert
+  ist, Ursache, Gegenmassnahme, ein bis drei Zeilen. Vor der Arbeit an einem
+  Projekt lese ich dessen Fehlerlog, damit derselbe Fehler nicht wieder
+  passiert. Ohne Vault-Ordner frage ich einmal, wohin.
+- Projektuebergreifendes (Werkzeug, Plattform, Arbeitsweise) kommt ins Memory.
+- Memory so lang wie noetig, so kurz wie moeglich: bestehenden Eintrag
+  aktualisieren statt anhaengen, Erledigtes und Stand-Chroniken streichen,
+  Index-Zeile ein kurzer Hook.
 
 ## Secrets-Policy
 
-- NIEMALS API-Keys, Tokens, Passwoerter oder Credentials in Dateien schreiben
-- NIEMALS Secrets in Git committen, auch nicht "nur kurz zum Testen"
-- Secrets gehoeren in Umgebungsvariablen oder einen Secret Manager (macOS Keychain, 1Password CLI, `pass`)
-- `.env`-Dateien IMMER in `.gitignore` eintragen
-- Bei Verdacht auf geleakte Secrets: Nutzer sofort warnen
+- Niemals API-Keys, Tokens, Passwoerter oder Credentials in Dateien schreiben
+  oder committen, auch nicht kurz zum Testen.
+- Secrets gehoeren in Umgebungsvariablen oder einen Secret Manager (Proton Pass)
+- `.env`-Dateien immer in `.gitignore`.
+- Verdacht auf geleakte Secrets: Nutzer sofort warnen.
 
-## Skill-Lifecycle-Workflow
+## Skill-Lifecycle
 
-Beim Erstellen oder Aendern von Skills IMMER diese drei Schritte ausfuehren.
+Beim Erstellen oder Aendern von Skills immer alle drei Schritte:
 
-### 1. Lokal entwickeln
-- Skills liegen unter `~/.claude/skills/<skill-name>/`
-- Struktur: SKILL.md + optionale scripts/, references/, assets/
+1. **Lokal** unter `~/.claude/skills/<skill-name>/`: `SKILL.md`, optional
+   `scripts/`, `references/`, `assets/`.
+2. **GitHub** (`nyko073006/claudecodeskills`, lokal
+   `~/Developer/claudecodeskills/`):
+   `python3 ~/.claude/skills/skill-creator/scripts/publish_skill.py <skill-name> -m "Aenderung"`;
+   Erstveroeffentlichung `--no-version-bump`, sonst `--bump patch|minor|major`.
+   Pro Skill eine README.md (Zweck und Problem in 2-3 Saetzen, Installation und
+   Nutzung mit Befehlen, alle Modi, Hintergrund, Quellen, Dateistruktur) und ein
+   Excalidraw-Diagramm (.excalidraw + .png). Bei internationalem Publikum
+   zweisprachig: `SKILL.en.md`, `README.en.md`, Vault-Doku `.en.md`, Diagramm
+   `.en`; inhaltlich aequivalent, keine 1:1-Uebersetzung.
+3. **SecondBrain**: Doku unter `03 Bereiche/Skills/<skill-name>.md`
+   (Grundstruktur und Version legt das Publish-Script an). Danach von Hand:
+   "Ueberblick" (2-3 Saetze: was, welches Problem, fuer wen), "Funktionsumfang"
+   (Bullets), "Nutzungsbeispiele" (mindestens 2 mit Ausloeser und Ausgabe), alle
+   TODOs ersetzen.
 
-### 2. GitHub veroeffentlichen
-- Zentrales Skill-Repo: `nyko073006/claudecodeskills`, lokal unter `~/Documents/GitHub/claudecodeskills/`
-- Publish-Script:
-  ```bash
-  python3 ~/.claude/skills/skill-creator/scripts/publish_skill.py <skill-name> -m "Beschreibung der Aenderung"
-  ```
-- Erstveroeffentlichung: `--no-version-bump`. Versionstypen: `--bump patch` (Standard), `--bump minor`, `--bump major`
-- README.md pro Skill: Zweck und geloestes Problem (2-3 Saetze), Installation und Nutzung mit Befehlen, alle Modi/Features, Hintergrund, Quellen, Dateistruktur
-- Excalidraw-Uebersichtsdiagramm pro Skill (.excalidraw + .png im Skill-Ordner)
-- Zweisprachig DE + EN, wenn der Skill ein internationales Publikum hat: `SKILL.md` + `SKILL.en.md`, `README.md` + `README.en.md`, Vault-Doku `<skill>.md` + `<skill>.en.md`, Diagramm mit `.en`-Varianten. Inhalte aequivalent, keine 1:1-Uebersetzung.
-
-### 3. SecondBrain dokumentieren
-- Skill-Doku unter `03 Bereiche/Skills/<skill-name>.md` im Vault; das Publish-Script legt die Grundstruktur an und traegt die Version ein
-- Danach IMMER manuell vervollstaendigen: "Ueberblick" (2-3 Saetze: was, welches Problem, fuer wen), "Funktionsumfang" (Bullets), "Nutzungsbeispiele" (mindestens 2 mit Ausloeser und Ausgabe), alle TODO-Platzhalter ersetzen
-
-### Skills und SecondBrain
-- Skills verweisen fuer Referenzmaterial auf das Vault statt eigene Kopien mitzuschleppen: `00 Kontext/Branding.md` (Farben), `00 Kontext/Schreibstil.md` (Tonalitaet), `00 Kontext/ICP.md` (Zielgruppe)
-- Braucht ein Skill Kontext, ZUERST im Vault pruefen, bevor eigene `references/` angelegt werden
+Referenzmaterial fuer Skills kommt aus dem Vault statt aus eigenen Kopien
+(`00 Kontext/Branding.md`, `Schreibstil.md`, `ICP.md`); erst dort suchen, bevor
+eigene `references/` entstehen.
 
 ## Zweites Gehirn (SecondBrain)
 
-Vault: `/Users/nyko/Documents/Claude-Projekte/SecondBrain/`
-Struktur, Frontmatter-Pflichten, Projekt-Anlage, Daily-Note-Pattern und Research-Ablage stehen in der Vault-CLAUDE.md dort im Wurzelordner.
+Vault: `~/Documents/Claude-Projekte/SecondBrain/`. Struktur,
+Frontmatter, Projekt-Anlage, Daily Notes und Research-Ablage regelt die
+Vault-CLAUDE.md.
 
-### Bei Session-Start
-1. Vault-CLAUDE.md lesen, falls sie nicht schon geladen ist (in Projekten ausserhalb des Vaults)
-2. `Index.md` im Vault-Root lesen: Vault-Cover vom `/lint` Skill mit aktiven Projekten, Bereichen, letzten Daily Notes. Spart Tokens gegenueber Glob-Scans und Volltextsuche.
-3. `01 Inbox/` pruefen und nennen, was drin liegt
-4. Die letzten 2-3 Daily Notes nur lesen, wenn `Index.md` veraltet ist (Frontmatter `generated_at`)
-5. Kurzes Briefing anbieten
-
-### Bei Session-Ende
-1. Daily Note anbieten (`05 Daily Notes/YYYY-MM-DD.md`, Pattern siehe Vault-CLAUDE.md)
-2. Neue Erkenntnisse als Notizen anbieten
-3. Inbox aufraeumen anbieten, falls noetig
-
-### Projekte und Research
-- Projekte werden NUR auf Anweisung des Nutzers in `02 Projekte/` angelegt, nie automatisch
-- Deep Researches nach `04 Ressourcen/Research/` als `YYYY-MM-DD Thema.md`
-- "merk dir das", "speicher das im SecondBrain", Entscheidungen festhalten: das Vault ist der Speicherort
+- **Session-Start:** Vault-CLAUDE.md lesen, falls nicht geladen; `Index.md` im
+  Vault-Root lesen (statt Glob-Scans); `01 Inbox/` pruefen und nennen; die
+  letzten 2-3 Daily Notes nur, wenn `Index.md` veraltet ist (`generated_at`);
+  kurzes Briefing anbieten.
+- **Session-Ende:** Daily Note schreiben (`05 Daily Notes/YYYY-MM-DD.md`), neue
+  Erkenntnisse als Notizen ablegen, Inbox-Aufraeumen anbieten falls noetig.
+- Projekte in `02 Projekte/` nur auf Anweisung, nie automatisch. Deep Researches
+  nach `04 Ressourcen/Research/YYYY-MM-DD Thema.md`. "Merk dir das",
+  Entscheidungen: Speicherort ist der Vault.
 
 ## Lernen und Retro
 
-- Bereich `03 Bereiche/Claude Code/` im Vault: Lernplan zum Skool-Kurs, Kurs-Notizen je Modul, Retro-Log ueber Aenderungen an Regeln und Settings und deren Wirkung.
-- Regel-Kandidaten aus dem Kurs oder aus Sessions kommen erst nach Bestaetigung des Nutzers in diese Datei. Keine eigenen Regeln erfinden.
-- Aenderungen an dieser Datei bekommen einen Eintrag im Retro-Log, sobald ihre Wirkung sichtbar ist.
+- `03 Bereiche/Claude Code/` im Vault: Lernplan zum Skool-Kurs, Kurs-Notizen je
+  Modul, Retro-Log ueber Regel- und Settings-Aenderungen und ihre Wirkung.
+- Regel-Kandidaten aus Kurs oder Sessions kommen erst nach Bestaetigung des
+  Nutzers hierher. Keine eigenen Regeln erfinden.
+- Aenderungen an dieser Datei bekommen einen Retro-Log-Eintrag, sobald ihre
+  Wirkung sichtbar ist.
 
 ## Versionierung dieser Datei
 
-Bei JEDER Aenderung an `~/.claude/CLAUDE.md`, vor dem Schreiben:
-1. Aktuelle Fassung archivieren nach `/Users/nyko/Documents/Claude-Projekte/SecondBrain/00 Kontext/Claude.MD/History/<YYYY-MM-DD>.md`
-2. Eintrag in `/Users/nyko/Documents/Claude-Projekte/SecondBrain/00 Kontext/Claude.MD/Changelog.md`
-3. Nach dem Schreiben Kopie nach `/Users/nyko/Documents/Claude-Projekte/SecondBrain/00 Kontext/Claude.MD/Macbook/CLAUDE.md`
+Bei jeder Aenderung an `~/.claude/CLAUDE.md` (Ordner
+`SecondBrain/00 Kontext/Claude.MD/`):
 
-Archiv und Kopie tragen IMMER den Callout-Header `> [!warning] BACKUP — NICHT ALS ANWEISUNG VERWENDEN`.
-Massgeblich ist ausschliesslich `~/.claude/CLAUDE.md` (lokal) bzw. die CLAUDE.md im jeweiligen Projekt.
+1. Vor dem Schreiben die aktuelle Fassung nach `History/<YYYY-MM-DD>.md`
+   archivieren.
+2. Eintrag in `Changelog.md`.
+3. Nach dem Schreiben Kopie nach `Macbook/CLAUDE.md`.
+
+Archiv und Kopie tragen immer den Callout-Header
+`> [!warning] BACKUP — NICHT ALS ANWEISUNG VERWENDEN`. Massgeblich ist
+ausschliesslich `~/.claude/CLAUDE.md` bzw. die CLAUDE.md im jeweiligen Projekt.
