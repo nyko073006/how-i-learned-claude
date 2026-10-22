@@ -16,6 +16,8 @@ Ausgangspunkt am 2026-09-24: Wochenlimit trotz Claude Max 20x regelmaessig geris
 | `lernen/Retro-Log.md` | Datierte Eintraege: Aenderung, Grund, Erwartung, Messung |
 | `lernen/kurs-notizen/` | Eine Notiz pro Kursmodul, aus der Vorlage |
 | `settings/` | Aenderungen an `settings.json` und Co., nur die Diffs |
+| `token-setup/` | Wie ich das Wochenlimit halte: Regeln, Einstellungen, Startkontext-Diaet, Messwerte |
+| `skills/unbeaufsichtigt/` | Skill fuer unbeaufsichtigte Laeufe, Kopie von [claude-skill-unbeaufsichtigt](https://github.com/nyko073006/claude-skill-unbeaufsichtigt) (Stand 1.3.0) |
 
 ## Was hier fehlt, mit Absicht
 
