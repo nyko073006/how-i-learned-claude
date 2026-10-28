@@ -13,39 +13,6 @@ Alles komplett auf Deutsch.
 Ziel: Alle Limits halten und Qualitaet hoch halten. Hebel: kleiner Kontext,
 passender Effort, nichts unnoetiges.
 
-### Befristet bis Fr 30.10.2026, 06:00: Limit ausreizen
-
-- Bis zum Reset des Wochenlimits am Freitag, 30.10.2026, 06:00, reize ich das
-  Usage-Limit so weit wie moeglich aus: Effort `max` in jeder Session,
-  Sub-Agents auf Opus, Ultracode anlassbezogen. Das geht den Abschnitten
-  "Effort", "Modell" und "Sub-Agents und Workflows" sowie dem Memory
-  `subagents-immer-sonnet` vor.
-- Ultracode anlassbezogen: Der Schalter bleibt an, damit ich Workflows selbst
-  starten darf. Vor jeder substanziellen Aufgabe pruefe ich, ob ein Workflow
-  etwas liefert, das solo oder ein einzelner Sub-Agent nicht liefert, und
-  sage in einem Satz, ob er laeuft und was er liefern soll. Anlass: Breite
-  (mehr Material, als ein Kontext sauber fasst), Tragweite, die mehr als eine
-  unabhaengige Pruefung braucht (Spec, Plan, Review, Regel, Entscheidung),
-  oder ein offener Loesungsraum. Sonst solo oder einzelne Sub-Agents.
-  Planumsetzungen laufen weiter wie unten, auch per `sdd-aufgabe`. Das geht
-  der Vorgabe von Ultracode-Hinweis und Skill `workflow-authoring` (Workflow
-  fuer jede substanzielle Aufgabe) vor.
-- Sub-Agents: beim Spawn `model: "opus"` statt `"sonnet"`, auch in Workflows
-  (`sdd-aufgabe`: `impl.model` und `reviewer.model`). Grund: Das `model:` im
-  Frontmatter der eigenen Agenten (alle `sonnet`) schlaegt die
-  Umgebungsvariable.
-- Technisch in `~/.claude/settings.json`: `"ultracode": true`,
-  `env.CLAUDE_CODE_EFFORT_LEVEL` = `"max"` (`effortLevel` kennt kein `max`),
-  `env.CLAUDE_CODE_SUBAGENT_MODEL` = `"opus"`. Sicherung:
-  `settings.json.bak-2026-10-27`. Wirkt in neu gestarteten Sessions.
-- Rueckbau: Der launchd-Auftrag `de.nyko.limit-zurueck`
-  (`~/.claude/limit-zurueck/zurueck.py`, Log
-  `~/Library/Logs/limit-zurueck.log`) setzt die drei Schalter am 30.10. um
-  06:00 zurueck und traegt sich aus. Ab dann gilt dieser Abschnitt nicht mehr;
-  die erste Session danach prueft Log und `settings.json`, auch den Effort der
-  Sub-Agents (`03 Bereiche/Claude Code/Fehlerlog.md`, 28.10.), entfernt den
-  Abschnitt (Archiv, Changelog, Kopie) und sagt es dem Nutzer.
-
 ### Kontext-Cap 175k
 
 - Ein Auftrag pro Session. Handoff, dann `/clear`. Aber fruehestens ab 10 %

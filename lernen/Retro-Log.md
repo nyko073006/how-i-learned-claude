@@ -12,6 +12,26 @@ chat_url: unbekannt
 
 Datierte Eintraege, was an Regeln oder Settings geaendert wurde, warum, und ob es gewirkt hat. Neueste Eintraege oben.
 
+## 2026-10-28 (2) Limit ausreizen vorzeitig beendet (Notbremse bei 79 % Woche)
+
+### Änderung
+
+- Abschnitt „Limit ausreizen“ aus der CLAUDE.md entfernt; es gelten wieder „Effort“, „Modell“ und „Sub-Agents und Workflows“. `settings.json`: `ultracode` und `env.CLAUDE_CODE_EFFORT_LEVEL` entfernt, `env.CLAUDE_CODE_SUBAGENT_MODEL` = `sonnet` (Sicherung `settings.json.bak-2026-10-28`). Der launchd-Auftrag `de.nyko.limit-zurueck` findet am 30.10. nichts mehr und trägt sich aus.
+- `effort: medium` in 13 eigenen Sonnet-Agenten (alle außer `kevin`), weil Sub-Agents sonst den Cockpit-Startwert `--effort xhigh` erben ([[03 Bereiche/Claude Code/Fehlerlog|Fehlerlog]], 28.10.).
+- Anlass: Nutzer („wir müssen sofort was anpassen bin bei 78% woche!!“).
+
+### Wirkung des Abschnitts vom 27.10. (offener Punkt aus der Daily vom 27.10.)
+
+- Woche 1–2 % am 27.10. gegen 18 Uhr (nach dem Planwechsel), 60 % am 28.10. gegen 11 Uhr, 79 % um 13:31: rund 77 Punkte in 19,5 Stunden mit Nachtpause, zuletzt 7–8 Punkte je Stunde. 5-Stunden-Fenster um 13:31 bei 81 %.
+- Um 13:31 liefen 7 Sessions, in 6 davon Sub-Agents mit Effort `max` auf Opus.
+- Urteil: Ausreizen ohne Zielrate verbraucht die Woche in unter einem Tag.
+
+### Offen
+
+- Laufende Sessions behalten bis zum Neustart `max` und Opus-Sub-Agents; `/clear` reicht nicht, die Schalter hängen am Prozess.
+- Cockpit-Startwähler steht auf `xhigh`: Für den Lead ist das Standard, `general-purpose`-Sub-Agents erben es aber. „aus“ wählen.
+- Vorschlag, nicht beschlossen: Ausreiz-Phasen nur mit Zielrate (Restprozent durch Reststunden) und Prüfung alle 2–3 Stunden.
+
 ## 2026-10-28 Ultracode anlassbezogen, Nachprüfung je Workflow, Opus-Effort xhigh
 
 ### Änderung
@@ -36,7 +56,7 @@ Datierte Eintraege, was an Regeln oder Settings geaendert wurde, warum, und ob e
   - Kosten: Output-Tokens der `agent-*.jsonl` im Transcript dir des Laufs, Höchstwert je `message.id`, summiert ([[output-tokens-hoechstwert-je-antwort]]). Nicht `subagent_tokens` aus der Abschlussmeldung, das ist ungefähr der Endkontext (erster Lauf: 656.259 gemeldet, 356.220 Output-Tokens). Auch nicht `budget.spent()`, das zählt die Hauptschleife des Turns mit.
   - Eine Zeile je Aufruf des Workflow-Werkzeugs; `sdd-aufgabe`, auch verschachtelt, eine Zeile je Plan und Session mit summierten Tokens.
 - Blind für die Gegenrichtung: Solo erledigte Aufgaben bekommen keine Zeile. Die Auswertung erkennt überflüssige Workflows, aber keine fehlenden.
-- Zeilen bis 30.10. stammen aus Läufen mit Opus-Sub-Agents und Effort `max`. Die erste Auswertung nach dem Reset gilt nur dafür; nach einigen Läufen mit Sonnet wiederholen. Sie geht zusammen mit dem offenen Punkt aus der Daily vom 27.10. (Wirkung der Woche mit `max` und Ultracode): Zeilen nach Spalte „Art“, „lohnt“ gegen „lohnt nicht“.
+- Zeilen bis 28.10., 13:31, stammen aus Läufen mit Opus-Sub-Agents und Effort `max`. Die erste Auswertung nach dem Reset gilt nur dafür; nach einigen Läufen mit Sonnet wiederholen. Sie geht zusammen mit dem offenen Punkt aus der Daily vom 27.10. (Wirkung der Woche mit `max` und Ultracode): Zeilen nach Spalte „Art“, „lohnt“ gegen „lohnt nicht“.
 
 ### Offen
 
@@ -47,6 +67,9 @@ Datierte Eintraege, was an Regeln oder Settings geaendert wurde, warum, und ob e
 | Datum | Aufgabe | Art | Lauf-ID | Output-Tokens | Mehrwert gegenüber Satz vom Start | Urteil |
 |---|---|---|---|---|---|---|
 | 2026-10-28 | Entwurf „Ultracode anlassbezogen“ der globalen CLAUDE.md gegenlesen | Regel | wf_2c1def96-b7a | 356.220 (3 Opus-Agenten, Effort max, 27 min) | Erwartung stand nur im Briefing, nicht als Satz vorab: Widersprüche in Text und Messweise, Kostenquelle und Selbstbewertung als offene Fragen. 11 Funde übernommen, 1 widerlegt. Darüber hinaus: falsche Kostenquelle (`subagent_tokens`), Maßstab rechnete Pflicht-Reviews dem Workflow zu, Anlass-Kriterien zu weit, Sub-Agents erben den Lead-Effort, `/effort` als Kipp-Ursache samt falscher Daten im Entwurf, kevin.md, Spalten, Gegenrichtung. 8 der 11 kamen aus nur einer Linse; die Linse Messbarkeit allein hätte 8 gebracht, die beiden anderen 3 weitere, darunter den einzigen hohen Befund. | lohnt, aber teuer für drei Leser |
+| 2026-10-28 | Bauprobe Spec B (alter): B1 und B2 in Repo-Kopien bauen, Gegenprüfung B1, Regel-Linse (Vorsitzung) | Spec | wf_4dcffd4b-cc6 | 824.701 (5 Opus-Agenten, 74 min; skeptiker-b2 am Nutzungslimit abgebrochen) | Satz vom Start stand in der Vorsitzung, hier nicht geprüft. Über solo hinaus: gemessene Breite der Bildzeile (Etikett nur an s2), Poolzahlen 36/35/29, Blocker an R37 (Element 1 braucht drei Sätze), vier Mutanten aus B1 überleben die Suite, Altbestand liefert ohne Wächter still falsche Ergebnisse. Die Gegenprüfung von B2 fehlte, nachgeholt in wf_5e77e7a3-8b1. | lohnt; der Abbruch am Limit kostete die Gegenprüfung |
+| 2026-10-28 | Gegenprüfung Bauprobe B2 und Kernbehauptungen für Spec B (alter) | Spec | wf_5e77e7a3-8b1 | 1.153.554 (8 Opus-Agenten: 4 Linsen, 4 Nachrechnungen; 104 min) | Satz vom Start (nur als Statussatz): vier Linsen und je Linse eine unabhängige Nachrechnung statt eines Skeptikers laut Handoff. Rund 33 Funde in die Spec übernommen, 2 doppelt; die Nachrechnung widerlegte keinen Befund und präzisierte 4, darunter die Rekursion des vorgeschlagenen Ziehweg-Fixes ohne Pool. Neu: alter-Pool um den 04.01.2027 leer; ein leerer Pool kostet still 38,9 % der Versuche; skriptBefund lässt die Alter der älteren Person, „durch 7 minus 2“, die Teilgröße und Pronomen durch; der einzige Negativtest „Fehlschluss ab Satz 2“ ging in B2 verloren; der Verwurf nach R48 muss auf alter begrenzt sein, weil verworfen ein Endstatus ist. Jeder Fund kam aus genau einer Linse; die stärkste Linse (skript) hätte allein 11 gebracht. | lohnt |
+| 2026-10-28 | Werkzeugkasten Automatisierung aus zehn Handbüchern einer Fachsoftware, nur Herstellerdoku | Recherche | wf_c0b806e4-14c | 5.182.647 (68 Opus-Agenten, ab 10:08; 24 von 25 Auswertern und 3 Sichter am 5-h-Limit um 10:29 abgebrochen, Reset 10:30) | Satz vom Start stand nur im Briefing (alle zehn Handbücher abdecken, jeden Eintrag gegenprüfen). Über solo hinaus: Die Belegprüfung korrigierte 132 von 171 Einträgen (Seite, Pfad, Rolle) und verwarf keinen. Die Versionsprüfung fand 2 entfallene, 1 fraglichen, 4 unklare und 6 neue. Die Lückensuche fand 8 Lücken und 15 Mängel. Abgedeckt sind nur ein Modulpaket und sechs Lückenpakete; sieben Module fehlen. | lohnt so nicht: Die Prüfung ist wertvoll, aber das Skript lief nach dem Ausfall ohne Wächter weiter und lieferte für viel Geld einen Teilstand |
 
 ## 2026-10-22 ~/AGENTS.md entfernt, Opus-Effort wieder high
 
