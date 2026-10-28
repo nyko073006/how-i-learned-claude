@@ -3,7 +3,7 @@ tags:
   - claude-code
   - retro
 status: aktiv
-aktualisiert: 2026-10-22
+aktualisiert: 2026-10-28
 source: claude
 chat_url: unbekannt
 ---
@@ -11,6 +11,42 @@ chat_url: unbekannt
 # Retro-Log Arbeitsweise Claude Code
 
 Datierte Eintraege, was an Regeln oder Settings geaendert wurde, warum, und ob es gewirkt hat. Neueste Eintraege oben.
+
+## 2026-10-28 Ultracode anlassbezogen, Nachprüfung je Workflow, Opus-Effort xhigh
+
+### Änderung
+
+- Befristeter Abschnitt „Limit ausreizen“ (bis 30.10., 06:00): Ultracode nicht mehr für jede substanzielle Aufgabe. Der Schalter `"ultracode": true` bleibt, damit der Lead Workflows selbst starten darf. Vor jeder substanziellen Aufgabe prüft er, ob ein Workflow etwas liefert, das solo oder ein einzelner Sub-Agent nicht liefert, und sagt in einem Satz, ob er läuft und was er liefern soll. Anlass: Breite, Tragweite, die mehr als eine unabhängige Prüfung braucht, oder ein offener Lösungsraum. Planumsetzungen laufen weiter wie bisher, auch per `sdd-aufgabe`.
+- Dauerhaft („Sub-Agents und Workflows“): Nach jedem Workflow prüft der Lead, ob er den Output verbessert hat, gemessen am Satz vom Start. Urteil in einem Satz an den Nutzer, eine Zeile in die Bilanz unten.
+- Effort: Opus-Standard `xhigh` statt `high`; `settings.json` steht seit 27.10., 06:47, so. Die Ursache der Kipper ist jetzt belegt: `/effort <Stufe>` speichert jede Wahl außer `max` als Standard für neue Sessions (Transkripte: 22.10. um 19:57 und sechsmal am 23.10. `medium`, 27.10. zwischen 06:47 und 06:48 dreimal `xhigh`). Der Nutzer behält `xhigh`, die Regel zieht nach. Der Mechanismus bleibt, der Prüfpunkt vom 22.10. gilt also weiter: Weicht der Wert ab, hat vermutlich ein `/effort` ihn gesetzt.
+- `~/.claude/agents/nyko/kevin.md`: „kein `max` oder ultracode ungefragt“ statt „kein xhigh …“, sonst widerspräche Kevins Datei dem neuen Opus-Standard.
+- Anlass: Nutzerwunsch („ultracode nur anlassbezogen, aber immer überprüfen ob es den output verbessert“). Wer den Anlass entscheidet, wie lange die Nachprüfung gilt und welcher Opus-Effort gilt, hat der Nutzer per Rückfrage entschieden. Der Wortlaut der Anlass-Regel stammt aus dem Vorschlag des Leads, vom Nutzer per Auswahl bestätigt; nach der Gegenprüfung (erste Bilanzzeile) verschärft, die Messweise korrigiert.
+
+### Erwartung
+
+- Workflows nur dort, wo Breite, mehr als eine unabhängige Prüfung oder ein offener Lösungsraum sie tragen; Kleinkram und einfache Prüfungen solo oder mit einem Sub-Agent. Nach Zuordnung des Prüfers wären von 19 Läufen am 28.10. bis 11 Uhr 18 schon unter die erste, weitere Fassung der Kriterien gefallen.
+- Die Bilanz zeigt nach einigen Läufen, bei welchen Aufgabenarten Ultracode den Output verbessert.
+
+### Messung
+
+- Zählweise je Zeile:
+  - Maßstab ist der Satz vom Start: was der Workflow liefern soll, das solo oder ein einzelner Sub-Agent nicht liefert. Bei Planumsetzung zählen Umsetzer, `task-reviewer` und `agy` zu solo, weil sie auch ohne Workflow Pflicht sind.
+  - Mehrwert ist nur, was darüber hinaus den Output mit Fundstelle geändert hat. Selbst erzeugte und wieder gestrichene Fehlbefunde zählen nicht.
+  - Bei parallelen Linsen dazu: wie viele übernommene Funde nur aus einer Linse kamen und wie viele der beste Einzelprüfer allein gebracht hätte. Das zeigt, ob ein Sub-Agent gereicht hätte.
+  - Kosten: Output-Tokens der `agent-*.jsonl` im Transcript dir des Laufs, Höchstwert je `message.id`, summiert ([[output-tokens-hoechstwert-je-antwort]]). Nicht `subagent_tokens` aus der Abschlussmeldung, das ist ungefähr der Endkontext (erster Lauf: 656.259 gemeldet, 356.220 Output-Tokens). Auch nicht `budget.spent()`, das zählt die Hauptschleife des Turns mit.
+  - Eine Zeile je Aufruf des Workflow-Werkzeugs; `sdd-aufgabe`, auch verschachtelt, eine Zeile je Plan und Session mit summierten Tokens.
+- Blind für die Gegenrichtung: Solo erledigte Aufgaben bekommen keine Zeile. Die Auswertung erkennt überflüssige Workflows, aber keine fehlenden.
+- Zeilen bis 30.10. stammen aus Läufen mit Opus-Sub-Agents und Effort `max`. Die erste Auswertung nach dem Reset gilt nur dafür; nach einigen Läufen mit Sonnet wiederholen. Sie geht zusammen mit dem offenen Punkt aus der Daily vom 27.10. (Wirkung der Woche mit `max` und Ultracode): Zeilen nach Spalte „Art“, „lohnt“ gegen „lohnt nicht“.
+
+### Offen
+
+- Sub-Agents erben einen Session-Effort (`--effort` aus dem Cockpit-Startwähler, steht auf `xhigh`, oder `/effort`) und laufen dann nicht mit `medium`; gemessen mit 13 Wegwerf-Sessions ([[03 Bereiche/Claude Code/Fehlerlog|Fehlerlog]], 28.10.). Ab 30.10., wenn `max` wegfällt, liefen sie im Cockpit mit `xhigh`. Abhilfe: Cockpit-Startwähler auf „aus“, dann gilt `settings.json`; optional `effort: medium` in den eigenen Sonnet-Agenten. Entscheidung beim Nutzer.
+
+### Ultracode-Bilanz
+
+| Datum | Aufgabe | Art | Lauf-ID | Output-Tokens | Mehrwert gegenüber Satz vom Start | Urteil |
+|---|---|---|---|---|---|---|
+| 2026-10-28 | Entwurf „Ultracode anlassbezogen“ der globalen CLAUDE.md gegenlesen | Regel | wf_2c1def96-b7a | 356.220 (3 Opus-Agenten, Effort max, 27 min) | Erwartung stand nur im Briefing, nicht als Satz vorab: Widersprüche in Text und Messweise, Kostenquelle und Selbstbewertung als offene Fragen. 11 Funde übernommen, 1 widerlegt. Darüber hinaus: falsche Kostenquelle (`subagent_tokens`), Maßstab rechnete Pflicht-Reviews dem Workflow zu, Anlass-Kriterien zu weit, Sub-Agents erben den Lead-Effort, `/effort` als Kipp-Ursache samt falscher Daten im Entwurf, kevin.md, Spalten, Gegenrichtung. 8 der 11 kamen aus nur einer Linse; die Linse Messbarkeit allein hätte 8 gebracht, die beiden anderen 3 weitere, darunter den einzigen hohen Befund. | lohnt, aber teuer für drei Leser |
 
 ## 2026-10-22 ~/AGENTS.md entfernt, Opus-Effort wieder high
 
@@ -490,7 +526,8 @@ Fall, fuer den ein Kill-Switch da ist.
 
 ### Ausgangslage
 
-- Wochenlimit trotz Claude Max 20x regelmaessig gerissen.
+- Wochenlimit trotz Claude Max 20x regelmaessig gerissen. Plan: Claude Max 20x, der groesste Plan. Ursache war das Muster (Punkte unten), nicht das Kontingent.
+- Stand 07.10.2026 (Limit-Verlauf): Laut Nyko stoesst er nicht mehr ans Limit; am 07.10. drei angefangene 5h-Fenster, keins ueber 10 %. Die Verlaeufe 23.09.-07.10. enthalten 0 Limit-Abbrueche. Limit ist damit kein vorrangiges Problem mehr. Hohe Tageswerte im Cockpit (07.10.: 1,53 Mio. Output) stimmen und kommen ueberwiegend aus Sub-Agents (62 %). Der damalige Kontext-Cap 150k ist inzwischen 175k (~/.claude/CLAUDE.md).
 - Effort-Stufe "ultracode"/"xhigh" dauerhaft aktiv, unabhaengig von der Aufgabengroesse.
 - 1M-Kontext-Modell im Einsatz, Sessions liefen bis 90 MB Transkript auf.
 - CLAUDE.md-Regel "immer Agenten-Team, nie Solist" erzwang Sub-Agents auch bei kleinen Aufgaben.

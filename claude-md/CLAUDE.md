@@ -13,6 +13,39 @@ Alles komplett auf Deutsch.
 Ziel: Alle Limits halten und Qualitaet hoch halten. Hebel: kleiner Kontext,
 passender Effort, nichts unnoetiges.
 
+### Befristet bis Fr 30.10.2026, 06:00: Limit ausreizen
+
+- Bis zum Reset des Wochenlimits am Freitag, 30.10.2026, 06:00, reize ich das
+  Usage-Limit so weit wie moeglich aus: Effort `max` in jeder Session,
+  Sub-Agents auf Opus, Ultracode anlassbezogen. Das geht den Abschnitten
+  "Effort", "Modell" und "Sub-Agents und Workflows" sowie dem Memory
+  `subagents-immer-sonnet` vor.
+- Ultracode anlassbezogen: Der Schalter bleibt an, damit ich Workflows selbst
+  starten darf. Vor jeder substanziellen Aufgabe pruefe ich, ob ein Workflow
+  etwas liefert, das solo oder ein einzelner Sub-Agent nicht liefert, und
+  sage in einem Satz, ob er laeuft und was er liefern soll. Anlass: Breite
+  (mehr Material, als ein Kontext sauber fasst), Tragweite, die mehr als eine
+  unabhaengige Pruefung braucht (Spec, Plan, Review, Regel, Entscheidung),
+  oder ein offener Loesungsraum. Sonst solo oder einzelne Sub-Agents.
+  Planumsetzungen laufen weiter wie unten, auch per `sdd-aufgabe`. Das geht
+  der Vorgabe von Ultracode-Hinweis und Skill `workflow-authoring` (Workflow
+  fuer jede substanzielle Aufgabe) vor.
+- Sub-Agents: beim Spawn `model: "opus"` statt `"sonnet"`, auch in Workflows
+  (`sdd-aufgabe`: `impl.model` und `reviewer.model`). Grund: Das `model:` im
+  Frontmatter der eigenen Agenten (alle `sonnet`) schlaegt die
+  Umgebungsvariable.
+- Technisch in `~/.claude/settings.json`: `"ultracode": true`,
+  `env.CLAUDE_CODE_EFFORT_LEVEL` = `"max"` (`effortLevel` kennt kein `max`),
+  `env.CLAUDE_CODE_SUBAGENT_MODEL` = `"opus"`. Sicherung:
+  `settings.json.bak-2026-10-27`. Wirkt in neu gestarteten Sessions.
+- Rueckbau: Der launchd-Auftrag `de.nyko.limit-zurueck`
+  (`~/.claude/limit-zurueck/zurueck.py`, Log
+  `~/Library/Logs/limit-zurueck.log`) setzt die drei Schalter am 30.10. um
+  06:00 zurueck und traegt sich aus. Ab dann gilt dieser Abschnitt nicht mehr;
+  die erste Session danach prueft Log und `settings.json`, auch den Effort der
+  Sub-Agents (`03 Bereiche/Claude Code/Fehlerlog.md`, 28.10.), entfernt den
+  Abschnitt (Archiv, Changelog, Kopie) und sagt es dem Nutzer.
+
 ### Kontext-Cap 175k
 
 - Ein Auftrag pro Session. Handoff, dann `/clear`. Aber fruehestens ab 10 %
@@ -49,11 +82,12 @@ passender Effort, nichts unnoetiges.
 
 ### Effort
 
-- Standard `high` fuer Opus (Lead), `medium` fuer alle anderen Modelle inkl.
+- Standard `xhigh` fuer Opus (Lead), `medium` fuer alle anderen Modelle inkl.
   Sonnet-Sub-Agents. Gesetzt in `~/.claude/settings.json`
-  (`modelSettings.claude-opus-5-5.effortLevel` bzw. `effortLevel`). `xhigh` und
-  `ultracode` nur, wenn der Nutzer es fuer die Aufgabe verlangt (`ultracode` im
-  Prompt oder `/effort`).
+  (`modelSettings.claude-opus-5-5.effortLevel` bzw. `effortLevel`). Mehr als
+  der Standard (`max`, bei den anderen Modellen `xhigh`) und `ultracode` nur,
+  wenn der Nutzer es fuer die Aufgabe verlangt (`ultracode` im Prompt oder
+  `/effort`).
 
 ### Modell
 
@@ -103,6 +137,13 @@ passender Effort, nichts unnoetiges.
   Finanzakte, Finanzen, `.env` oder Secrets: Das geht an OpenAI bzw.
   Google. Ergebnisse pruefe ich wie jede Sub-Agent-Ausgabe.
 - Multi-Agent-Orchestrierung, also workflows, auf nachfrage starten
+- Nach jedem Workflow pruefe ich, ob er den Output verbessert hat. Beim Start
+  sage ich in einem Satz, was er liefern soll, das solo oder ein einzelner
+  Sub-Agent nicht liefert; bei Planumsetzung zaehlen Umsetzer,
+  `task-reviewer` und `agy` zu solo. Mehrwert ist nur, was er ueber solo
+  hinaus geliefert hat und den Output mit Fundstelle aenderte. Urteil in einem
+  Satz an den Nutzer, eine Zeile in die Ultracode-Bilanz im Retro-Log
+  (`03 Bereiche/Claude Code/Retro-Log.md`); die Zaehlweise steht dort.
 - Jeder Sub-Agent bekommt ein Mini-Briefing: Ergebniswunsch, Rolle, Kontext
   (Dateien, noetiges Wissen), konkrete Aufgabe.
 - Ergebnisse von Sub-Agents (auch Stefan und Manfred) pruefe ich, bevor ich sie
@@ -129,8 +170,8 @@ mit dem Median; p90 ist die Tagesobergrenze, der Rekord kein Planwert.
   Session im Schnitt 150k Output-Tokens.
 - p90-Tag: 5.000 bis 6.500 Zeilen, 4,5 Mio. Output-Tokens. Rekord: 24.000
   Zeilen (11.08.2026), 9,3 Mio. Tokens (18.10.2026).
-- Seit 04.10. (subagent-driven): Median 3,5 Mio., p90 7,7 Mio. Output-Tokens
-  pro aktivem Tag.
+- Seit 04.10. (subagent-driven, Stand 27.10., 23 aktive Tage): Median 4,2 Mio.,
+  p90 6,8 Mio. Output-Tokens pro aktivem Tag.
 - Faustregel je 1.000 Zeilen netto, Tests, Doku und Denken eingerechnet:
   subagent-driven (Umsetzer, Reviews, agy) rund 1,7 Mio. Output-Tokens, linear
   ohne Review-Runden rund 400k.
