@@ -6,7 +6,9 @@ steht nur, was Claude Code selbst betrifft.
 
 ## Sprache
 
-Alles komplett auf Deutsch.
+Alles komplett auf Deutsch. Texte in meinem Namen folgen dem Kern in
+`00 Kontext/Schreibstil.md`. Wortverbote aus Skills gelten nur im jeweiligen
+Skill, nicht allgemein.
 
 ## Betriebsregeln Claude Code
 
@@ -47,33 +49,83 @@ passender Effort, nichts unnoetiges.
   Terminal bricht lange Zeilen hart um, markierter Text bringt Umbrueche und
   Einrueckung mit; die Codeblock-Leiste des Cockpits kopiert den Block sauber.
 
+### Abnahme und Uebersicht
+
+- Abnahmen gestalte ich selbst und fahre sie am echten Ergebnis (laufende App,
+  gerenderte Seite, Screenshot), nicht am Code.
+- Umkehrbare Schritte mache ich und nenne sie in einem Satz: Notiz anlegen,
+  ergaenzen oder verschieben, Entwurf, Recherche, lokaler Commit, Branch,
+  Sub-Agent im Standard. Gibt es zwei naheliegende Lesarten und sind beide
+  umkehrbar, nehme ich die naheliegendere und nenne die andere.
+- Ich frage nur bei Aussenwirkung (Mail, Post, Push, Deploy, Kontakt zu
+  Dritten), Geld, Loeschen oder Ueberschreiben ohne Kopie, Commit/Push nach
+  Repo-Regel, Geschmack und Positionierung.
+- Beruehrt eine Aufgabe ein anderes Projekt (gleiche Person, Firma,
+  Werkzeug, Entscheidung, Frist, wiederverwendbarer Code), nenne ich das von
+  selbst in einem Satz mit Fundstelle. Quellen: `Index.md`,
+  Entitaeten-Notizen, Memory.
+- Uebersicht an den Nutzer: Ergebnis plus offene Entscheidung, sonst nichts.
+
 ### Effort
 
-- Standard `xhigh` fuer Opus (Lead), `medium` fuer alle anderen Modelle inkl.
-  Sonnet-Sub-Agents. Gesetzt in `~/.claude/settings.json`
-  (`modelSettings.claude-opus-5-5.effortLevel` bzw. `effortLevel`). Mehr als
-  der Standard (`max`, bei den anderen Modellen `xhigh`) und `ultracode` nur,
+- Standard `xhigh` fuer Fable als Lead und fuer Review (`task-reviewer`,
+  `skeptiker`), `high` fuer Opus als Lead, `medium` fuer alle anderen
+  Sub-Agents und Modelle. Gesetzt in `~/.claude/settings.json`
+  (`modelSettings.<modell>.effortLevel` bzw. `effortLevel`) und im `effort:`
+  der Agent-Dateien. Mehr als der Standard
+  (`max`, wo `medium` gilt `xhigh`) und `ultracode` nur,
   wenn der Nutzer es fuer die Aufgabe verlangt (`ultracode` im Prompt oder
   `/effort`).
 
+### Tagesfokus und Wochenbudget
+
+- Das Wochenlimit bremst nicht mehr. Gesteuert wird ueber den Tagesfokus: In
+  der ersten Session des Tages frage ich "Was ist heute Fokus?", wenn
+  `~/.claude/cockpit/fokus.json` kein heutiges Datum traegt, und setze die
+  Antwort mit `python3 ~/.claude/hooks/fokus-setzen.py <projekt> <repo-pfad>`.
+  Das Skript schreibt `fokus.json` und traegt das Fable-Modell in
+  `.claude/settings.local.json` des Fokus-Repos ein (beim alten Fokus-Repo
+  wieder heraus); neue Sitzungen dort starten auf Fable, auch in Worktrees.
+  Jede weitere Session liest die Datei beim Start.
+- Fokusprojekt, volle Besetzung: Lead Fable `xhigh`; `task-reviewer`,
+  `skeptiker` und Abschlussreview beim Spawn mit `model: "fable"`; alle
+  Sub-Agents beim Spawn mit `effort: "xhigh"` (auch `umsetzer`). Sichtbares (Oberflaeche, Layout, Text auf dem
+  Bildschirm) baut der Lead selbst mit geladenem `impeccable` statt ueber
+  `umsetzer` und nimmt es an Screenshots in echten Geraetegroessen gegen die
+  `DESIGN.md` des Projekts ab; Logik und Tests bleiben subagent-driven.
+- Alle anderen Projekte: Standard wie unter Effort, Modell und Sub-Agents.
+- Der Hook `~/.claude/hooks/budget-kurve.py` meldet den Wochenstand weiter,
+  nur als Information (Planwert je Million Output-Tokens: Opus 2,9, Sonnet
+  2,2, Fable 7,7 Wochenprozent; Mix mit Fable nur im Fokusprojekt rund 4;
+  Eichung 13.11.2026; Sollkurve 13 mal k Prozent am Tag k,
+  hoechstens 90 %; Werte ueber `budget_*` in
+  `~/.claude/cockpit/thresholds.json`). Gelb und Rot loesen nichts mehr aus
+  und werden erst ab Tag 4 der Limitwoche gemeldet (`budget_melden_ab_tag`).
+
 ### Modell
 
-- Lead: Opus. Sub-Agents: Sonnet. Fable nur auf Zuruf fuer Architektur, Review
-  und harte Debugging-Faelle.
+- Fable nur im Fokusprojekt, dort als Lead und im Review (siehe Tagesfokus).
+- Sonst: Lead Opus. Sub-Agents und Review (`task-reviewer`, `skeptiker`,
+  Abschlussreview): Opus. Recherche (`web-rechercheur`, `beleg-sucher`,
+  `repo-inventur`, `Explore`): Sonnet. Gesetzt in `~/.claude/settings.json`
+  (kein `model`, also Standard Opus; `env.CLAUDE_CODE_SUBAGENT_MODEL`) und in
+  den Agent-Dateien. `/model` speichert den Standard fuer alle neuen
+  Sitzungen, deshalb im Fokusprojekt nie per `/model` auf Fable wechseln.
 - Zu Beginn jeder Session nenne ich in einem Satz das Modell.
 
 ### Sub-Agents und Workflows
 
 - Standard linear: Ich arbeite selbst bei einer Datei, einer Frage oder einer
   Recherche mit klarer Fundstelle.
-- Sub-Agents (Sonnet) ab zwei unabhaengigen Teilen oder wenn mehr als vier
+- Sub-Agents ab zwei unabhaengigen Teilen oder wenn mehr als vier
   Dateien zu lesen sind, deren Inhalt ich danach nicht selbst brauche.
-- Planimplementierungen laufen immer und ausnahmslos subagent-driven
+- Planimplementierungen laufen immer subagent-driven
   (`superpowers:subagent-driven-development`), auch bei kleinen Plaenen und
-  unter den Schwellen oben. Keine Rueckfrage nach der Ausfuehrungsart.
+  unter den Schwellen oben; einzige Ausnahme ist Sichtbares im Fokusprojekt
+  (siehe Tagesfokus). Keine Rueckfrage nach der Ausfuehrungsart.
   Umsetzung und Fix-Runden macht `umsetzer`, Review und Re-Review
   `task-reviewer`, statt `general-purpose` aus den Skill-Vorlagen. Ein
-  staerkeres Modell (Fix-Runde 4-5, Abschlussreview) per `model`-Parameter.
+  staerkeres Modell (Fix-Runde 4-5) per `model`-Parameter.
   Parallel zum ersten Task-Review prueft `agy` (Modus pruefen, Gemini) den
   Diff des Tasks, damit eine andere Modellfamilie gegenliest; seine
   nachgeprueften Befunde zaehlen wie Review-Befunde. Faellt der Task unter
@@ -81,7 +133,7 @@ passender Effort, nichts unnoetiges.
   Workflow `sdd-aufgabe` ist das die Standard-Linse.
 - Fuer wiederkehrende Rollen die eigenen Agenten in `~/.claude/agents/nyko/`
   statt Rollentext im Prompt: `skeptiker`, `repo-inventur`, `beleg-sucher`,
-  `web-rechercheur`, `task-reviewer`, `umsetzer` (alle Sonnet, nur
+  `web-rechercheur`, `task-reviewer`, `umsetzer` (Modelle siehe Modell, nur
   `umsetzer` und `web-rechercheur` schreiben). `general-purpose` nur, wenn
   kein eigener Agent passt.
 - Persona-Agenten `stefan`, `manfred`, `forensicmedia`, `dieper`, `kevin`,
@@ -161,7 +213,7 @@ mit dem Median; p90 ist die Tagesobergrenze, der Rekord kein Planwert.
   `03 Bereiche/<Bereich>/`), verlinkt im Hub. Je Eintrag Datum, was passiert
   ist, Ursache, Gegenmassnahme, ein bis drei Zeilen. Vor der Arbeit an einem
   Projekt lese ich dessen Fehlerlog, damit derselbe Fehler nicht wieder
-  passiert. Ohne Vault-Ordner frage ich einmal, wohin.
+  passiert. Ohne Vault-Ordner nehme ich `03 Bereiche/<Bereich>/` und sage es.
 - Projektuebergreifendes (Werkzeug, Plattform, Arbeitsweise) kommt ins Memory.
 - Memory so lang wie noetig, so kurz wie moeglich: bestehenden Eintrag
   aktualisieren statt anhaengen, Erledigtes und Stand-Chroniken streichen,
