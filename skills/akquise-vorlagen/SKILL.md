@@ -9,7 +9,7 @@ description: >
   "schreib eine Akquise-Mail", "LinkedIn-Post", "LinkedIn Strategie", "wie kommentiere ich",
   "Kunde hat zugesagt, was jetzt", "Onboarding", "Verkaufsgespraech", "Funnel", "Quiz",
   "Erstkontakt", "Neukunden gewinnen", "Demo vorab bauen", "Probescan", "Leads ansprechen".
-version: 1.2.0
+version: 1.2.1
 user-invocable: true
 ---
 
@@ -35,11 +35,11 @@ Strategie. **Nichts wird gesendet oder gepostet**; Ergebnis ist ein Entwurf.
 
 ## Recht DE, gilt fuer Abschnitt 1 und 2
 
-Nach § 7 UWG, Stand der Rechtsprechung 11/2025, keine Rechtsberatung:
+Nach § 7 UWG, juengstes Urteil 11/2025, keine Rechtsberatung:
 - **E-Mail und Direktnachrichten** in sozialen Netzwerken (LinkedIn, Xing, Instagram, WhatsApp) gelten
-  als elektronische Post. Werbung darueber braucht die vorherige ausdrueckliche Einwilligung, auch bei
-  Unternehmen. Eine Vernetzung oder ein Like ist keine Einwilligung (AG Duesseldorf 23 C 120/25;
-  BGH I ZR 25/19; OLG Nuernberg 3 U 724/18).
+  als elektronische Post (OLG Nuernberg 3 U 724/18, Hinweis am Rande). Werbung darueber braucht die
+  vorherige ausdrueckliche Einwilligung, auch bei Unternehmen (fuer Werbung im Postfach: BGH I ZR 25/19).
+  Eine Vernetzung oder ein Like ist keine Einwilligung (AG Duesseldorf 23 C 120/25 vom 20.11.2025).
 - **Anruf bei Unternehmen** nur bei mutmasslicher Einwilligung, also konkretem, erkennbarem Bedarf
   des Betriebs. Blosse Branchenzugehoerigkeit reicht nicht.
 - **Brief** ist zulaessig, solange der Empfaenger nicht widersprochen hat.
@@ -181,4 +181,4 @@ was nur der Nutzer weiss (Zahlen, Namen, Fallbeispiele). Nie Zahlen oder Kundenn
 Reel-Notiz [[2026-10-30 Reel-Sammlung 134 Reels zu Skills]]; Vorgaenger
 [[2026-08-15 Akquise-Lehren aus einem Jahr KI-Agentur]]; Themenseite [[Vertrieb und Positionierung]].
 Abschnitt 1 und die Gespraechskniffe: Reel-Sammlung vom 18.11.2026 (sechs Reels zur Demo vorab,
-zwei zum Gespraech); Recht DE: Urteile oben, Stand 11/2025.
+zwei zum Gespraech); Recht DE: Urteile oben, juengstes 11/2025.
