@@ -4,8 +4,9 @@ description: >
   Verwenden, wenn der Nutzer nicht am Platz ist und eine Aufgabe ohne ihn zu Ende laufen soll:
   "ich bin nicht am Platz", "ich bin weg", "bin unterwegs", "mach allein weiter", "unbeaufsichtigt",
   "unattended", "AFK", "ueber Nacht", "stell keine Rueckfragen", "/unbeaufsichtigt"; auch wenn ein
-  Auftrag den Block "Unattended Execution Mode" enthaelt.
-version: 1.3.0
+  Auftrag den Block "Unattended Execution Mode" enthaelt. Mehrere Aufgaben ueber Nacht ("Nachtschicht",
+  "arbeite die Issues ab", "was kannst du heute Nacht erledigen"): Abschnitt Nachtschicht.
+version: 1.4.4
 user-invocable: true
 ---
 
@@ -71,6 +72,41 @@ Repo, nicht nur im Schlussbericht: Der Bericht scrollt weg, das Repo bleibt.
    traegst du in `DECISIONS.md` ein.
 10. **Secrets nie weitergeben.** Taucht ein Secret in einer Ausgabe auf, ersetze es ueberall, wo du
    es festhaeltst (`DECISIONS.md`, Commit, Bericht), durch `<geschwaerzt>`.
+
+## Nachtschicht: mehrere Aufgaben, Nutzer schlaeft
+
+Gilt zusaetzlich zu den Regeln oben, wenn nicht eine Aufgabe, sondern eine Liste laufen soll.
+
+1. **Vor dem Gehen: Warteschlange festlegen, solange er noch da ist.** Frage an das Repo: "Was
+   ist ueber Nacht nuetzlich und braucht den Nutzer nicht?" Kandidaten aus offenen GitHub-Issues
+   (`gh issue list`), Backlog oder Handoff. Je Kandidat eine Zeile: Aufgabe, Abnahmekriterium
+   (welcher Test, welcher Befehl zeigt "fertig"), warum ohne ihn loesbar. Raus faellt alles mit
+   Geschaeftsentscheidung, neuem Paket, Secret, Migration oder Aussenwirkung. Der Nutzer streicht
+   oder bestaetigt; erst dann geht er.
+2. **Nachtwache einschalten.** Die Regeln oben sind Bitten an das Modell; die Nachtwache sperrt
+   hart, bevor ein Befehl laeuft (Push, Merge, PR- und Issue-Schreiben, Deploy, `reset --hard`,
+   MCP-Senden). Start der Nacht-Sitzung:
+   ```bash
+   claude --settings ~/.claude/skills/unbeaufsichtigt/scripts/nachtwache-settings.json
+   ```
+   Sperrliste in `scripts/nachtwache.json` (einstellbar). Pruefen nach jeder Aenderung:
+   `python3 -I ~/.claude/skills/unbeaufsichtigt/scripts/test_nachtwache.py`.
+   Meldet ein Aufruf "Nachtwache:", ist das ein Blocker nach Regel 3, nie ein Anlass fuer einen
+   Umweg (anderes Werkzeug, Skript, `curl` an die API).
+3. **Je Aufgabe ein eigener Worktree** (`afk/<kurzname>`), unabhaengige Aufgaben parallel per
+   Umsetzer-Agent (eigener Agent, falls eingerichtet, sonst `general-purpose`). Zwei Aufgaben, die dieselben Dateien beruehren, laufen nacheinander.
+4. **Jede Aufgabe geht durch fremde Augen, bevor sie committet wird:** ein Review-Agent (eigener
+   Agent, falls eingerichtet, sonst `general-purpose`) gegen das Abnahmekriterium, dazu optional
+   eine Zweitmeinung einer anderen Modellfamilie (nur lesend, nie fuer sensible Daten). Hoechstens zwei
+   Fix-Runden je Aufgabe, dann Blocker. Ziel: Er wacht nicht zu ungepruefter Arbeit auf.
+5. **Morgenbericht als Entscheidungsliste**, oben im Schlussbericht und in
+   `DECISIONS.md` des ersten Worktrees:
+   - je Aufgabe eine Zeile: fertig (Branch, Testzahl) oder Blocker (ein Halbsatz)
+   - darunter **nummerierte Fragen, jede in einer Zeile beantwortbar** (ja/nein oder A/B), mit
+     Vorschlag: `3. Pagination per Cursor (A) oder Offset (B)? Vorschlag A, weil ...`.
+     Keine offene Frage ohne Vorschlag. Was er nur lesen soll, gehoert nicht in diese Liste.
+   Er beantwortet morgens die Liste in einer Nachricht (`1 ja, 2 B, 3 A`); damit geht die
+   naechste Sitzung weiter.
 
 ## Abschluss: einer von zwei Zustaenden
 

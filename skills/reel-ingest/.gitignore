@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+tests/fixtures/sample.mp4
+cookies.txt
+.superpowers/

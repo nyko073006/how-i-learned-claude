@@ -5,6 +5,7 @@ handoffs/
 
 # Kursmaterial und Account-Screenshots
 *.png
+!skills/**/*.png
 *.jpg
 
 # macOS
@@ -13,3 +14,8 @@ handoffs/
 # nie versionieren
 .env
 *.bak*
+
+# Python-Caches
+__pycache__/
+*.pyc
+.pytest_cache/

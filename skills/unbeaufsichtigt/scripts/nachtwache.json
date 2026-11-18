@@ -1,0 +1,19 @@
+{
+  "_hinweis": "Sperrliste der Nachtwache. Regulaere Ausdruecke, Gross-/Kleinschreibung egal. bash_muster gilt fuer Bash-Befehle, werkzeug_muster fuer Werkzeugnamen (MCP).",
+  "bash_muster": [
+    "\\bgit\\b[^;&|]*\\s(push|merge)\\b",
+    "\\bgit\\b[^;&|]*\\sreset\\s+--hard\\b",
+    "\\bgit\\b[^;&|]*\\sclean\\b",
+    "\\bgit\\b[^;&|]*\\sbranch\\s+-D\\b",
+    "\\bgh\\s+(pr|issue|release|repo|gist)\\s+(create|merge|comment|close|edit|delete|review|reopen)\\b",
+    "\\bgh\\s+api\\b.*(-X|--method)\\s*(POST|PATCH|PUT|DELETE)\\b",
+    "\\bsupabase\\s+db\\s+(push|reset)\\b",
+    "\\bvercel\\b[^;&|]*(--prod|\\sdeploy\\b|\\spromote\\b)",
+    "\\bfirebase\\s+deploy\\b",
+    "\\bwrangler\\s+(deploy|publish)\\b",
+    "\\bfastlane\\b"
+  ],
+  "werkzeug_muster": [
+    "^mcp__.*(send|forward|reply|delete|trash|publish|deploy|create_event|update_event|post)"
+  ]
+}

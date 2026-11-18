@@ -1,0 +1,12 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|mcp__.*",
+        "hooks": [
+          { "type": "command", "command": "python3 -I ~/.claude/skills/unbeaufsichtigt/scripts/nachtwache.py" }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "vault": "",
+  "dienst_ordner": "",
+  "repo_wurzeln": [
+    "~/Developer"
+  ],
+  "skill_repo": "",
+  "skill_remote": "",
+  "oeffentlich_repo": "",
+  "oeffentlich": [],
+  "sperrliste": "~/.config/cockpit/public-denylist.txt",
+  "reel_konto": "",
+  "reel_chrome_profil": ""
+}
