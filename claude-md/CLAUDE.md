@@ -104,13 +104,28 @@ passender Effort, nichts unnoetiges.
 
 ### Modell
 
-- Fable nur im Fokusprojekt, dort als Lead und im Review (siehe Tagesfokus).
-- Sonst: Lead Opus. Sub-Agents und Review (`task-reviewer`, `skeptiker`,
-  Abschlussreview): Opus. Recherche (`web-rechercheur`, `beleg-sucher`,
-  `repo-inventur`, `Explore`): Sonnet. Gesetzt in `~/.claude/settings.json`
-  (kein `model`, also Standard Opus; `env.CLAUDE_CODE_SUBAGENT_MODEL`) und in
-  den Agent-Dateien. `/model` speichert den Standard fuer alle neuen
-  Sitzungen, deshalb im Fokusprojekt nie per `/model` auf Fable wechseln.
+- Fable im Fokusprojekt als Lead und im Review (siehe Tagesfokus), sonst nur
+  fuer die Gegenpruefung der Spec.
+- Sonst: Lead Opus. Review (`task-reviewer`, `skeptiker`, Abschlussreview)
+  und Sub-Agents: Opus, ausser `umsetzer` (Sonnet). Recherche
+  (`web-rechercheur`, `beleg-sucher`, `repo-inventur`, `Explore`): Sonnet.
+  Gesetzt in `~/.claude/settings.json` (kein `model`, also Standard Opus;
+  `env.CLAUDE_CODE_SUBAGENT_MODEL`) und in den Agent-Dateien. `/model`
+  speichert den Standard fuer alle neuen Sitzungen, deshalb im Fokusprojekt
+  nie per `/model` auf Fable wechseln.
+- Spec, Plan, Umsetzung: Fable entscheidet, Opus schreibt, Sonnet setzt um.
+  - Spec: Im Fokusprojekt schreibt der Lead (Fable) sie im Gespraech mit dem
+    Nutzer. Sonst schreibt der Lead (Opus) sie, und `skeptiker` mit
+    `model: "fable"` prueft sie gegen, bevor geplant wird.
+  - Plan: Opus. Im Fokusprojekt schreibt ihn ein Sub-Agent
+    (`general-purpose`, `model: "opus"`, `superpowers:writing-plans`) und der
+    Lead prueft ihn; sonst schreibt ihn der Lead. Tasks, die Urteil brauchen
+    (Plattform-Interna, CSS, Messung, Fehlersuche), markiert der Plan mit
+    "Umsetzer: Opus".
+  - Umsetzung: `umsetzer` auf Sonnet; markierte Tasks und die dritte
+    Fix-Runde auf Opus (`model`-Parameter).
+  - Review nie schwaecher als die Umsetzung: im Fokusprojekt Fable, sonst
+    Opus.
 - Zu Beginn jeder Session nenne ich in einem Satz das Modell.
 
 ### Sub-Agents und Workflows
@@ -124,8 +139,9 @@ passender Effort, nichts unnoetiges.
   unter den Schwellen oben; einzige Ausnahme ist Sichtbares im Fokusprojekt
   (siehe Tagesfokus). Keine Rueckfrage nach der Ausfuehrungsart.
   Umsetzung und Fix-Runden macht `umsetzer`, Review und Re-Review
-  `task-reviewer`, statt `general-purpose` aus den Skill-Vorlagen. Ein
-  staerkeres Modell (Fix-Runde 4-5) per `model`-Parameter.
+  `task-reviewer`, statt `general-purpose` aus den Skill-Vorlagen. Modelle
+  je Rolle siehe Modell; im Workflow `sdd-aufgabe` laeuft die dritte
+  Fix-Runde auf Opus (`escalateAt`, Vorgabe 3).
   Parallel zum ersten Task-Review prueft `agy` (Modus pruefen, Gemini) den
   Diff des Tasks, damit eine andere Modellfamilie gegenliest; seine
   nachgeprueften Befunde zaehlen wie Review-Befunde. Faellt der Task unter

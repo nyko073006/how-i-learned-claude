@@ -3,7 +3,7 @@ tags:
   - claude-code
   - retro
 status: aktiv
-aktualisiert: 2026-11-13
+aktualisiert: 2026-11-16
 source: claude
 chat_url: unbekannt
 ---
@@ -11,6 +11,21 @@ chat_url: unbekannt
 # Retro-Log Arbeitsweise Claude Code
 
 Datierte Eintraege, was an Regeln oder Settings geaendert wurde, warum, und ob es gewirkt hat. Neueste Eintraege oben.
+
+## 2026-11-16 Spec-Gegenprüfung auf Fable außerhalb des Fokus, erster Lauf
+
+### Änderung
+
+- Globale CLAUDE.md vom 16.11.: Außerhalb des Fokusprojekts schreibt Opus die Spec, `skeptiker` mit `model: "fable"` prüft sie gegen, bevor geplant wird.
+
+### Messung
+
+- Erster Lauf: Website-Spec „Bühne Schwarz/Zoom“ (Opus-Lead, Website nicht Fokus), nach einem Builder-Check durch einen frischen Sub-Agent. Der Fable-Skeptiker fand 12 Befunde, davon 1 planblockierend (Regeltest wird mit winzigen Geräten grün, roter Gegentest gelaufen) und 6 mit Rotprobe am Spike-Build. Vier davon hat der Lead nachgeprüft, alle hielten. Daraus wurden Spec-Abschnitt 12 und vier Fragen an den Nutzer.
+- Kosten: 234k Sub-Agent-Tokens, 27 Minuten.
+
+### Urteil
+
+- Wirkt: Der Builder-Check vorher hatte zwei Fragen gefunden, der Skeptiker die Lücken, die den Plan entwertet hätten. Weiter so, auf die nächsten zwei Specs beobachten.
 
 ## 2026-11-13 Wirkungskontrolle Tagesfokus und Besetzung mit Fable, Trimmrunde
 
@@ -27,7 +42,7 @@ Quelle: `~/.claude/cockpit/limit-log.jsonl` (182 Einträge), Transkripte, `Limit
 - Lead `medium` gegen `xhigh`: 5,33 je Mio. bei 45 % Fable-Anteil (11.11., 06:00 bis 21:21) gegen 5,71 bei 67 % (danach bis 12.11., 15:04). Der Unterschied folgt dem Fable-Anteil, ein Aufschlag je Token durch `xhigh` ist nicht zu sehen. Ob `xhigh` je Aufgabe mehr Tokens braucht, misst das nicht.
 - Schätzung je Modell über 180 Fenster beider Wochen, Punkte je Mio. Output-Tokens: Opus 2,88 (2,6 bis 3,2), Sonnet 2,23 (2,0 bis 2,5), Fable 7,74 (7,1 bis 8,5; Grundlage 4,49 Mio.). Fable getrennt: als Lead 8,6 (7,1 bis 11,4; 1,82 Mio.), im Sub-Agent 7,2 (6,1 bis 8,3; 2,66 Mio.). Spannen: 5. bis 95. Perzentil aus 3.000 Ziehungen der Fenster. Fable kostet je Output-Token rund das 2,7-Fache von Opus.
 - Wohin die Fable-Tokens gingen (10.11. bis 13.11., Mio.): `task-reviewer` 2,37, Lead 1,78, `umsetzer` 0,25, `skeptiker` 0,11. Das Review ist der größte Posten.
-- Verteilung auf Projekte am Limittag 7 (Fokus laut `fokus.json`: SAIN): SAIN 1,71 von 3,55 Mio. (48 %), Feiern HDH 1,04 (davon 0,79 Fable), dienstliche Daten-Admin 0,34. Limittag 6: SAIN 1,63 und Glasscockpit 1,51 von 4,23 Mio. Der Fokus des 11.11. ist nicht mehr nachzulesen, `fokus.json` hält nur den letzten Tag.
+- Verteilung auf Projekte am Limittag 7 (Fokus laut `fokus.json`: SAIN): SAIN 1,71 von 3,55 Mio. (48 %), Feiern HDH 1,04 (davon 0,79 Fable), [[dienstliche Daten-Admin - PMO HUB|dienstliche Daten-Admin]] 0,34. Limittag 6: SAIN 1,63 und Glasscockpit 1,51 von 4,23 Mio. Der Fokus des 11.11. ist nicht mehr nachzulesen, `fokus.json` hält nur den letzten Tag.
 - Trimmrunde 11.11.: Startkontext `holger` 64k auf 39,0k, `task-reviewer` 22,7k, `~/AGENTS.md` aus dem Startkontext. Effort-Wähler des Cockpits auf `aus`, Lead seit 11.11., 21:21 im Transkript `xhigh`.
 - Meldung ab Tag 4: `stufe()` des Hooks bleibt mit den geltenden Schwellen an Tag 1 bis 3 auch bei 30, 60 und 80 % still und meldet an Tag 4 Gelb bei 60 % und Rot bei 95 %. Im Betrieb erst in der Woche ab 13.11. zu sehen.
 
@@ -197,7 +212,7 @@ Frischer interaktiver Prozess im Home-Ordner (PID 62325, Start 09:34,
 Opus, Session `8d535a97`): **61.218** Tokens am ersten Request (27.675
 Cache-Lesung, 33.541 Cache-Schreibung). Die Erwartung von rund 61k aus
 Stufe 2 ist erfuellt, gegenueber 73.770 vor Stufe 2 sind es 12,5k weniger.
-Vercel fehlt im Deferred-Anhang, Figma und Claude Docs stehen weiter in
+[[Vercel]] fehlt im Deferred-Anhang, Figma und Claude Docs stehen weiter in
 den MCP-Anweisungen.
 
 ### Geaendert
@@ -268,7 +283,7 @@ erwarten. Gemessen ist das erst nach einem echten Neustart.
   Skills die Beschreibung") ist mit den Overrides nicht eingetreten.
 - `enabledPlugins` wird tief zusammengefuehrt; `true` in der Projektdatei
   schlaegt das globale `false`.
-- Claude Code kopiert `settings.local.json` beim Anlegen eines Worktrees
+- [[Claude Code]] kopiert `settings.local.json` beim Anlegen eines Worktrees
   mit. Eine lokale Datei reicht also, ein Commit ist nicht noetig.
 
 ### Offen
@@ -351,7 +366,7 @@ patina-charts-ios 82,2k (22 Starts), coremetrics 85,6k (14),
 67k, 71k und 78k landen.
 
 Wo die 76k jetzt stecken (Zeichen der Transkript-Anhaenge): 489
-Deferred-Namen mit 20,4k Zeichen, davon Vercel 244 (11,7k) und Higgsfield
+Deferred-Namen mit 20,4k Zeichen, davon Vercel 244 (11,7k) und [[Higgsfield]]
 117 (4,3k); Skill-Liste 125 Skills mit 29,9k, am Budget; MCP-Anweisungen
 11,5k, davon Figma und Claude Docs 4k ohne ein Tool dahinter; Agent-Liste
 16 Agents.
