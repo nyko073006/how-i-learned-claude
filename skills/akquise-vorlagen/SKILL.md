@@ -9,7 +9,7 @@ description: >
   "schreib eine Akquise-Mail", "LinkedIn-Post", "LinkedIn Strategie", "wie kommentiere ich",
   "Kunde hat zugesagt, was jetzt", "Onboarding", "Verkaufsgespraech", "Funnel", "Quiz",
   "Erstkontakt", "Neukunden gewinnen", "Demo vorab bauen", "Probescan", "Leads ansprechen".
-version: 1.2.1
+version: 1.2.2
 user-invocable: true
 ---
 
@@ -21,7 +21,7 @@ user-invocable: true
 python3 -c 'import json,os;print(os.path.expanduser(json.load(open(os.path.expanduser("~/.config/claude-skills/einstellungen.json")))["vault"]))'
 ```
 
-Fehlt die Datei oder der Schlüssel, frag nach dem Pfad. Fehlt die Datei, lege sie mit `{"vault": "<Pfad>"}` an. Fehlt nur der Schlüssel, ergänze ihn in der bestehenden Datei und lass alle anderen Schlüssel unverändert.
+Fehlt die Datei oder der Schlüssel oder ist der Wert leer, frag nach dem Pfad. Fehlt die Datei, lege sie mit `{"vault": "<Pfad>"}` an. Sonst trag den Pfad unter `vault` in die bestehende Datei ein und lass alle anderen Schlüssel unverändert.
 
 # akquise-vorlagen — Demo vorab, Kaltmail, LinkedIn, Gespraech, Onboarding
 
