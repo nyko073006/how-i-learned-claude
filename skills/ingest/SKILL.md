@@ -5,7 +5,7 @@ description: >
   Setzt bidirektionale Wikilinks, aktualisiert Synthese-Seiten und fuehrt ein Verarbeitungs-Log.
   Verwenden wenn der Nutzer "ingest", "verarbeite diese Notiz", "vernetze das",
   "link diese Notiz", "integriere das ins Vault" sagt.
-version: 1.0.4
+version: 1.0.5
 user-invocable: true
 allowed-tools:
   - Read
@@ -25,7 +25,7 @@ allowed-tools:
 python3 -c 'import json,os;print(os.path.expanduser(json.load(open(os.path.expanduser("~/.config/claude-skills/einstellungen.json")))["vault"]))'
 ```
 
-Fehlt die Datei oder der Schlüssel, frag nach dem Pfad. Fehlt die Datei, lege sie mit `{"vault": "<Pfad>"}` an. Fehlt nur der Schlüssel, ergänze ihn in der bestehenden Datei und lass alle anderen Schlüssel unverändert.
+Fehlt die Datei oder der Schlüssel oder ist der Wert leer, frag nach dem Pfad. Fehlt die Datei, lege sie mit `{"vault": "<Pfad>"}` an. Sonst trag den Pfad unter `vault` in die bestehende Datei ein und lass alle anderen Schlüssel unverändert.
 
 # Ingest Skill — Vault Vernetzung
 
