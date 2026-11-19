@@ -7,7 +7,7 @@ description: >
   Worktrees liegt und ob Obsidian die Markierung CLAUDE_CODE_CHILD_SESSION geerbt hat. Liest nur.
   Verwenden bei "was ist beim reload verloren gegangen", "was hat der neustart zerschossen",
   "wo waren wir", "reload-verlust", "welche sitzungen sind weg", "tabs nach neustart pruefen".
-version: 1.1.2
+version: 1.1.3
 user-invocable: true
 allowed-tools:
   - Bash
@@ -22,7 +22,7 @@ allowed-tools:
 python3 -c 'import json,os;print(os.path.expanduser(json.load(open(os.path.expanduser("~/.config/claude-skills/einstellungen.json")))["vault"]))'
 ```
 
-Fehlt die Datei oder der Schlüssel, frag nach dem Pfad. Fehlt die Datei, lege sie mit `{"vault": "<Pfad>"}` an. Fehlt nur der Schlüssel, ergänze ihn in der bestehenden Datei und lass alle anderen Schlüssel unverändert.
+Fehlt die Datei oder der Schlüssel oder ist der Wert leer, frag nach dem Pfad. Fehlt die Datei, lege sie mit `{"vault": "<Pfad>"}` an. Sonst trag den Pfad unter `vault` in die bestehende Datei ein und lass alle anderen Schlüssel unverändert.
 
 # reload-verlust — Was ging beim letzten Neuladen verloren?
 
