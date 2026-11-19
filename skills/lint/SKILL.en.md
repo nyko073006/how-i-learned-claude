@@ -8,7 +8,7 @@ description: >
   and suggests fixes.
   Use when the user says "lint", "vault check", "check the vault", "health check",
   "orphans", "project-compliance", "project-check", "graph check", "unlinked mentions".
-version: 1.7.3
+version: 1.7.4
 user-invocable: true
 allowed-tools:
   - Read
@@ -28,7 +28,7 @@ allowed-tools:
 python3 -c 'import json,os;print(os.path.expanduser(json.load(open(os.path.expanduser("~/.config/claude-skills/einstellungen.json")))["vault"]))'
 ```
 
-If the file or the key is missing, ask for the path. If the file is missing, create it with `{"vault": "<path>"}`. If only the key is missing, add it to the existing file and leave all other keys unchanged.
+If the file or the key is missing or the value is empty, ask for the path. If the file is missing, create it with `{"vault": "<path>"}`. Otherwise set `vault` in the existing file and leave all other keys unchanged.
 
 # Lint Skill — Vault Health Check
 

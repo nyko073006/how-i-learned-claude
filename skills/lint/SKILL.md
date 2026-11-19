@@ -9,7 +9,7 @@ description: >
   Verwenden wenn der Nutzer "lint", "vault check", "pruefe das vault", "gesundheitscheck",
   "verwaiste notizen", "orphans", "projekt-compliance", "projekt-check", "graph-check",
   "unverlinkte erwaehnungen", "entitaeten pruefen" sagt.
-version: 1.7.3
+version: 1.7.4
 user-invocable: true
 allowed-tools:
   - Read
@@ -29,7 +29,7 @@ allowed-tools:
 python3 -c 'import json,os;print(os.path.expanduser(json.load(open(os.path.expanduser("~/.config/claude-skills/einstellungen.json")))["vault"]))'
 ```
 
-Fehlt die Datei oder der Schlüssel, frag nach dem Pfad. Fehlt die Datei, lege sie mit `{"vault": "<Pfad>"}` an. Fehlt nur der Schlüssel, ergänze ihn in der bestehenden Datei und lass alle anderen Schlüssel unverändert.
+Fehlt die Datei oder der Schlüssel oder ist der Wert leer, frag nach dem Pfad. Fehlt die Datei, lege sie mit `{"vault": "<Pfad>"}` an. Sonst trag den Pfad unter `vault` in die bestehende Datei ein und lass alle anderen Schlüssel unverändert.
 
 # Lint Skill — Vault Gesundheits-Check
 
