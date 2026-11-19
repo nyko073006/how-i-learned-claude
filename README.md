@@ -61,13 +61,13 @@ Die Einstellungsdatei einmal anlegen, ohne eine vorhandene zu ueberschreiben:
 mkdir -p ~/.config/claude-skills && cp -n skills/einstellungen.beispiel.json ~/.config/claude-skills/einstellungen.json
 ```
 
-Danach in `~/.config/claude-skills/einstellungen.json` den eigenen `vault` eintragen. In der Vorlage sind alle Pfade leer (`""`); ein leerer Wert wirkt wie ein fehlender. Was das je Schluessel bedeutet:
+Danach in `~/.config/claude-skills/einstellungen.json` den eigenen `vault` eintragen. In der Vorlage sind die meisten Werte leer (`""` oder `[]`), vorbelegt sind nur `repo_wurzeln` und `sperrliste`; ein leerer Wert wirkt wie ein fehlender. Ist `vault` leer, fragen die Skills beim ersten Aufruf nach dem Pfad und tragen ihn ein. Was das je Schluessel bedeutet:
 
 - `vault`: `lint`, `verknuepfen` und `reload-verlust` brechen mit Klartext und Exit 2 ab, ebenso, wenn der Ordner nicht existiert. `skill-creator` (`publish_skill.py`) warnt nur und laesst den Vault-Doku-Schritt weg. Ist `vault` gesetzt, braucht `publish_skill.py` den Ordner `<VAULT>/03 Bereiche/Skills`; fehlt er, Exit 2, bevor etwas geschrieben wird.
 - `dienst_ordner`: leer heisst, die Pruefungen auf dienstliche Notizen entfallen: in `lint` der Dienstteil von Regel L5 und die Ausnahme in L1, in `verknuepfen` die Grenze fuer dienstliche Notizen (keine Notiz gilt als dienstlich).
 - `repo_wurzeln`: fehlt der Schluessel, gilt `~/Developer`.
 - `skill_repo`: Pflicht fuer `publish_skill.py` (oder `--repo-dir`); fehlt er, Abbruch mit Exit 2.
-- `skill_remote`: optional; fehlt er, laeuft der Push ueber ein vorhandenes `origin` weiter. `--create-remote` bricht nur dann mit Exit 2 ab, wenn es noch kein `origin` gibt.
+- `skill_remote`: optional; fehlt er, laeuft der Push ueber ein vorhandenes `origin` weiter. `--create-remote` bricht nur dann mit Exit 2 ab, wenn es noch kein `origin` gibt, und zwar vor dem Versionssprung.
 - `oeffentlich`: Liste der Skills (`["lint"]`), die zusaetzlich oeffentlich gespiegelt werden; leer oder fehlend heisst kein oeffentlicher Schritt. Ein String statt einer Liste ist ein Fehler (Exit 2).
 - `oeffentlich_repo`: lokale Arbeitskopie des oeffentlichen Repos. Steht der veroeffentlichte Skill in `oeffentlich` und fehlt `oeffentlich_repo`, Exit 2. `--pruefe-oeffentlich` braucht `oeffentlich_repo` immer.
 - `sperrliste`: Die Vorlage nennt `~/.config/cockpit/public-denylist.txt`. Steht der veroeffentlichte Skill in `oeffentlich`, bricht `publish_skill.py` mit Exit 2 ab, wenn diese Datei fehlt, keine Begriffe enthaelt oder nicht UTF-8 ist; `--pruefe-oeffentlich` laedt sie immer. Eigene Datei anlegen (ein Begriff je Zeile) oder den Pfad aendern.
