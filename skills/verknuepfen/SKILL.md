@@ -6,7 +6,7 @@ description: >
   Verwenden wenn der Nutzer "verknuepfen", "verlinke die notiz", "entitaeten verlinken", "link entities",
   "knowledge graph", "neue entitaeten", "kandidaten", "link note", "interlink" sagt, nach dem Schreiben
   einer Vault-Notiz und am Session-Ende vor der Daily Note.
-version: 1.2.2
+version: 1.2.3
 user-invocable: true
 allowed-tools:
   - Read
@@ -26,7 +26,7 @@ allowed-tools:
 python3 -c 'import json,os;print(os.path.expanduser(json.load(open(os.path.expanduser("~/.config/claude-skills/einstellungen.json")))["vault"]))'
 ```
 
-Fehlt die Datei oder der Schlüssel, frag nach dem Pfad. Fehlt die Datei, lege sie mit `{"vault": "<Pfad>"}` an. Fehlt nur der Schlüssel, ergänze ihn in der bestehenden Datei und lass alle anderen Schlüssel unverändert.
+Fehlt die Datei oder der Schlüssel oder ist der Wert leer, frag nach dem Pfad. Fehlt die Datei, lege sie mit `{"vault": "<Pfad>"}` an. Sonst trag den Pfad unter `vault` in die bestehende Datei ein und lass alle anderen Schlüssel unverändert.
 
 # Verknuepfen Skill - Knowledge Graph im Vault
 
