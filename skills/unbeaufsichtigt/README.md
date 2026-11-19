@@ -10,8 +10,11 @@ Wer Claude Code allein weiterarbeiten laesst, findet beim Zurueckkommen oft eine
 
 ```bash
 git clone https://github.com/nyko073006/how-i-learned-claude.git
-cp -R how-i-learned-claude/skills/unbeaufsichtigt ~/.claude/skills/unbeaufsichtigt
+mkdir -p ~/.claude/skills
+test -e ~/.claude/skills/unbeaufsichtigt && echo "unbeaufsichtigt existiert schon, nichts kopiert" || cp -R how-i-learned-claude/skills/unbeaufsichtigt ~/.claude/skills/
 ```
+
+Die letzte Zeile kopiert nur, wenn es `~/.claude/skills/unbeaufsichtigt` noch nicht gibt; ein vorhandener Skill gleichen Namens wird nie ueberschrieben.
 
 Danach Claude Code neu starten. Frueher lag der Skill im eigenen Repo `nyko073006/claude-skill-unbeaufsichtigt` (Stand 1.3.0); er wird nur noch im Repo `how-i-learned-claude` gepflegt.
 

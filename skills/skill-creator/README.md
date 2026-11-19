@@ -10,8 +10,13 @@ Wer Skills pflegt, macht nach jeder Aenderung dieselben Schritte von Hand: Versi
 
 ```bash
 git clone https://github.com/nyko073006/how-i-learned-claude.git
-cp -R how-i-learned-claude/skills/skill-creator ~/.claude/skills/skill-creator
+mkdir -p ~/.claude/skills
+test -e ~/.claude/skills/skill-creator && echo "skill-creator existiert schon, nichts kopiert" || cp -R how-i-learned-claude/skills/skill-creator ~/.claude/skills/
 ```
+
+Die letzte Zeile kopiert nur, wenn es `~/.claude/skills/skill-creator` noch nicht gibt; ein vorhandener Skill gleichen Namens wird nie ueberschrieben.
+
+`skill-creator` heisst wie Anthropics offizieller Skill. Meldet die Zeile einen vorhandenen Ordner, nicht darueberkopieren: entweder auf diesen Skill verzichten oder den vorhandenen Ordner vorher selbst umbenennen. Dieser Skill erwartet sich unter `~/.claude/skills/skill-creator`, seine Befehle nennen diesen Pfad.
 
 Voraussetzungen: Python 3 und Git. Fuer die PNG-Diagramme zusaetzlich Node, Playwright mit Chromium (`npm i -g playwright && npx playwright install chromium`) und Netz zu `cdn.jsdelivr.net`.
 
@@ -22,7 +27,7 @@ mkdir -p ~/.config/claude-skills
 cp -n how-i-learned-claude/skills/einstellungen.beispiel.json ~/.config/claude-skills/einstellungen.json
 ```
 
-`cp -n` laesst eine vorhandene Datei unberuehrt. Danach die Platzhalter durch eigene Werte ersetzen: `skill_repo` (Pfad des privaten Skill-Repos, Pflicht), `vault` (eigener Vault-Pfad), bei Bedarf `skill_remote`, `oeffentlich`, `oeffentlich_repo` und `sperrliste` (Tabelle unten).
+`cp -n` laesst eine vorhandene Datei unberuehrt. In der Vorlage sind die meisten Werte leer (`""` oder `[]`), vorbelegt sind nur `repo_wurzeln` und `sperrliste`; ein leerer Wert wirkt wie ein fehlender. Danach eigene Werte eintragen: `skill_repo` (Pfad des privaten Skill-Repos, Pflicht), `vault` (eigener Vault-Pfad), bei Bedarf `skill_remote`, `oeffentlich`, `oeffentlich_repo` und `sperrliste` (Tabelle unten).
 
 | Schluessel | Bedeutung |
 |------------|-----------|
