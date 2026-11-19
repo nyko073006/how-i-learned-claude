@@ -70,13 +70,13 @@ python3 ~/.claude/skills/skill-creator/scripts/publish_skill.py --pruefe-oeffent
 | `--bump patch\|minor\|major` | SemVer-Sprung, Vorgabe `patch`. |
 | `--no-version-bump` | Version bleibt, fuer die Erstveroeffentlichung. |
 | `--dry-run` | Zeigt alle geplanten Aenderungen, schreibt nichts. |
-| `--create-remote` | Legt das GitHub-Repo per `gh repo create` an. Vorgabe aus, nur mit ausdruecklicher Zustimmung. |
+| `--create-remote` | Legt das GitHub-Repo per `gh repo create` an. Vorgabe aus, nur mit ausdruecklicher Zustimmung. Ohne `skill_remote` und ohne `origin` Exit 2 vor jedem Schreiben. |
 | `--pruefe-oeffentlich` | Ohne Skill und `-m`: prueft alle Dateien unter `<oeffentlich_repo>/skills/` gegen die Sperrliste und meldet verwaiste Ordner; dazu die noch nicht gepushten Commits (`@{u}..HEAD`: Ordner, geaenderte Dateien unter `skills/`, Commit-Nachrichten). Ohne Upstream nur der Arbeitsbaum, mit Hinweis. Exit 0 sauber, 2 bei Treffern oder fehlender Einstellung. |
 | `--skills-dir`, `--repo-dir`, `--vault-dir` | Pfade ueberschreiben. |
 
 ## Sperrlisten-Pruefung
 
-Verglichen wird in Normalform (NFKD, ohne Akzente und unsichtbare Formatzeichen, klein); Treffer zaehlen auch im Dateipfad und im Binaerinhalt (z. B. Text-Chunks eines PNG); gerenderte Schrift im Bild sieht die Pruefung nicht. Ein PNG gilt nur als geprueft, wenn es aus der geprueften `.excalidraw` neu gerendert ist. Ausgegeben werden nur der Pfad (Treffer als `***` maskiert) und die Zeile, nie der Treffertext. Nutzerpfade und Links auf Claude-Sitzungen sind immer gesperrt, Symlinks gelten immer als Treffer. Eine `.publicignore` im Skill-Ordner (ein Glob je Zeile, `ordner/` fuer ganze Ordner) nimmt Dateien vom oeffentlichen Spiegel aus; sie selbst wird nie gespiegelt. Geprueft wird vor dem Kopieren und noch einmal am Index vor dem Commit; ein Treffer bricht ab. Ist das Spiegelziel, ein Elternordner bis zum Repo oder ein Eintrag darin ein Symlink, bricht der Spiegel vor jedem Schreiben ab.
+Verglichen wird in Normalform (NFKD, ohne Akzente und unsichtbare Formatzeichen, klein); Treffer zaehlen auch im Dateipfad und im Binaerinhalt (z. B. Text-Chunks eines PNG); gerenderte Schrift im Bild sieht die Pruefung nicht. Ein PNG gilt nur als geprueft, wenn es aus der geprueften `.excalidraw` neu gerendert ist. Ausgegeben werden nur der Pfad (Treffer als `***` maskiert) und die Zeile, nie der Treffertext. Nutzerpfade und Links auf Claude-Sitzungen sind immer gesperrt, Symlinks gelten immer als Treffer. Eine `.publicignore` im Skill-Ordner (ein Glob je Zeile, `ordner/` fuer ganze Ordner) nimmt Dateien vom oeffentlichen Spiegel aus; sie selbst wird nie gespiegelt. Geprueft wird vor dem Kopieren und noch einmal am Index vor dem Commit; ein Treffer bricht ab. Ist das Spiegelziel, ein Elternordner bis zum Repo oder ein Eintrag darin ein Symlink, bricht der Lauf vor jedem Schreiben ab, auch vor dem Versionssprung; Inhalte von `venv/` und `node_modules/` prueft er nicht, weil der Spiegel dort nichts schreibt.
 
 ## Vault-Doku
 

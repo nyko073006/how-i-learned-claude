@@ -372,6 +372,9 @@ def pruefe_symlinks(wurzel: Path, ziel: Path, liste=None) -> None:
             for name in sorted(dirs + files):
                 if Path(root, name).is_symlink():
                     gefunden.append(Path(root, name))
+            # In Ausschlussordner (venv, node_modules, ...) schreibt und loescht der Spiegel nie;
+            # ihr Eintrag selbst wird oben geprueft, ihr Inhalt nicht.
+            dirs[:] = [d for d in dirs if d not in EXCLUDED_DIRS]
     if gefunden:
         raise PublishError(
             "Symlink im Spiegelziel, nichts geschrieben (der Spiegel folgt keinen Links):\n    "
@@ -1182,6 +1185,18 @@ def _main(argv=None) -> int:
             f"Oeffentliches Repo '{oeff_repo}' ist kein git-Repo (oeffentlich_repo in {einstellungen_pfad()}); "
             "nichts geschrieben."
         )
+    # Symlinks in den Spiegelzielen sperren den Spiegel; deshalb hier und nicht erst in Schritt 3/6.
+    pruefe_symlinks(repo_dir, repo_dir / skill)
+    if oeffentlich:
+        pruefe_symlinks(oeff_repo, oeff_repo / "skills" / skill, liste)
+    if args.create_remote and not dry and not remote_slug:
+        hat_origin = (repo_dir / ".git").exists() and \
+            "origin" in run_git(repo_dir, ["remote"], check=False).stdout.split()
+        if not hat_origin:
+            raise EinstellungsFehler(
+                f"skill_remote fehlt in {einstellungen_pfad()} — ohne Slug kein --create-remote; "
+                "nichts geschrieben."
+            )
 
     if vault_dir is None:
         warn(f"vault fehlt in {einstellungen_pfad()} — kein Vault-Doku-Schritt.")
@@ -1262,6 +1277,19 @@ def _main(argv=None) -> int:
                 set_frontmatter_field(skill_text, version_key, new_version, after="name"),
                 encoding="utf-8",
             )
+        # Die englische Fassung traegt dieselbe Version, sonst laufen beide beim naechsten Bump auseinander.
+        skill_en = src / "SKILL.en.md"
+        if skill_en.is_file():
+            en_text = skill_en.read_text(encoding="utf-8")
+            if parse_frontmatter(en_text) is None:
+                warn(f"'{skill_en}' hat kein gueltiges Frontmatter — Version dort nicht gesetzt.")
+            else:
+                plan(f"SKILL.en.md Frontmatter {version_key}: {new_version} schreiben", dry)
+                if not dry:
+                    skill_en.write_text(
+                        set_frontmatter_field(en_text, version_key, new_version, after="name"),
+                        encoding="utf-8",
+                    )
 
     # --- c) Spiegeln ---------------------------------------------------------
     step(f"3/{gesamt} Spiegeln nach {repo_dir / skill}")

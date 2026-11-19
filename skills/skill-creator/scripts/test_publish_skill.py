@@ -366,6 +366,22 @@ class OeffentlichTest(Basis):
             ps.mirror_skill(src, repo / "demo", False, wurzel=repo)
         self.assert_aussen_unberuehrt(aussen)
 
+    def test_symlink_in_ausgeschlossenem_ordner_sperrt_nicht(self):
+        ziel = self.tmp / "repo/demo"
+        for ordner in ("node_modules/paket", "venv/lib"):
+            (ziel / ordner).mkdir(parents=True)
+            os.symlink("/nicht/da", ziel / ordner / "link")
+        try:
+            ps.pruefe_symlinks(self.tmp / "repo", ziel)
+        except ps.PublishError as exc:
+            self.fail(f"Links in node_modules/venv duerfen nicht sperren: {exc}")
+        os.symlink("/nicht/da", ziel / "node_modules" / "oben")
+        os.symlink(str(self.tmp), ziel / ".venv")
+        with self.assertRaises(ps.PublishError) as ctx:
+            ps.pruefe_symlinks(self.tmp / "repo", ziel)
+        self.assertIn("demo/.venv:0 (symlink)", str(ctx.exception))
+        self.assertNotIn("oben", str(ctx.exception))
+
     def test_symlinks_ohne_oserror_gemeldet(self):  # S1b
         repo = self.repo("oeff")
         self.datei("oeff/skills/demo/x.md", "sauber")
@@ -538,6 +554,69 @@ class CliTest(Basis):
         self.assertIn("oeff", err)
         self.assertIn("version: 1.0.0", (src / "SKILL.md").read_text(encoding="utf-8"))
         self.assertEqual(git(privat, "log", "--oneline", "--all").strip(), "")
+
+    def test_symlink_im_privaten_ziel_vor_jedem_schreiben(self):
+        privat = self.repo("privat")
+        aussen = self.tmp / "aussen"
+        aussen.mkdir()
+        os.symlink(str(aussen), privat / "demo")
+        self.schreibe_einstellungen({"skill_repo": str(privat)})
+        src = self.skill()
+        with self.assertRaises(ps.PublishError) as ctx:
+            self.lauf(["demo", "-m", "neu", "--skills-dir", str(src.parent)])
+        self.assertIn("demo:0 (symlink)", str(ctx.exception))
+        self.assertIn("version: 1.0.0", (src / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertEqual(list(aussen.iterdir()), [])
+
+    def test_symlink_im_oeffentlichen_ziel_vor_jedem_schreiben(self):
+        repo = self.oeffentlich_einrichten()
+        daten = json.loads(self.einst.read_text(encoding="utf-8"))
+        privat = self.repo("privat")
+        daten["skill_repo"] = str(privat)
+        self.schreibe_einstellungen(daten)
+        self.datei("oeff/skills/demo/a.md", "sauber\n")
+        os.symlink("/nicht/da", repo / "skills/demo/link.md")
+        src = self.skill()
+        with self.assertRaises(ps.PublishError) as ctx:
+            self.lauf(["demo", "-m", "neu", "--skills-dir", str(src.parent)])
+        self.assertIn("skills/demo/link.md:0 (symlink)", str(ctx.exception))
+        self.assertIn("version: 1.0.0", (src / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertEqual(git(privat, "log", "--oneline", "--all").strip(), "")
+        self.assertFalse((privat / "demo").exists())
+
+    def test_create_remote_ohne_slug_vor_jedem_schreiben(self):
+        privat = self.repo("privat")
+        self.schreibe_einstellungen({"skill_repo": str(privat)})
+        src = self.skill()
+        code, _, err = self.lauf(["demo", "-m", "neu", "--create-remote", "--skills-dir", str(src.parent)])
+        self.assertEqual(code, 2)
+        self.assertIn("skill_remote", err)
+        self.assertIn("version: 1.0.0", (src / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertEqual(git(privat, "log", "--oneline", "--all").strip(), "")
+        self.assertFalse((privat / "demo").exists())
+
+    def test_bump_hebt_auch_skill_en(self):
+        privat = self.repo("privat")
+        self.schreibe_einstellungen({"skill_repo": str(privat)})
+        src = self.skill()
+        self.datei("skills/demo/SKILL.en.md", "---\nname: demo\nversion: 1.0.0\n---\nText en\n")
+        code, _, err = self.lauf(["demo", "-m", "neu", "--bump", "minor", "--skills-dir", str(src.parent)])
+        self.assertEqual(code, 0, err)
+        self.assertIn("version: 1.1.0", (src / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertEqual((src / "SKILL.en.md").read_text(encoding="utf-8"),
+                         "---\nname: demo\nversion: 1.1.0\n---\nText en\n")
+        self.assertIn("version: 1.1.0", (privat / "demo/SKILL.en.md").read_text(encoding="utf-8"))
+
+    def test_create_remote_ohne_slug_mit_origin_laeuft(self):
+        privat = self.repo("privat")
+        bare = self.tmp / "origin.git"
+        subprocess.run(["git", "init", "-q", "--bare", "-b", "main", str(bare)], check=True)
+        git(privat, "remote", "add", "origin", str(bare))
+        self.schreibe_einstellungen({"skill_repo": str(privat)})
+        src = self.skill()
+        code, _, err = self.lauf(["demo", "-m", "neu", "--create-remote", "--skills-dir", str(src.parent)])
+        self.assertEqual(code, 0, err)
+        self.assertIn("version: 1.0.1", (src / "SKILL.md").read_text(encoding="utf-8"))
 
     # --- A2: Historien-Gate -------------------------------------------------
 

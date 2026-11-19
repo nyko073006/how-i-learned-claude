@@ -1,6 +1,6 @@
 ---
 name: skill-creator
-version: 1.3.0
+version: 1.3.1
 description: >
   Veroeffentlicht einen Claude-Skill in einem Durchgang ueber alle Ebenen des
   Skill-Lifecycles: lokal (Version bumpen), GitHub (spiegeln und committen), Vault
@@ -91,7 +91,8 @@ cd ~/.claude/skills/skill-creator/scripts && python3 -m unittest test_publish_sk
    Steht kein Top-Level-Feld da, wird `metadata.version` geprueft (so machen es die
    ~31 `seo-*`-Skills) und auch dort wieder zurueckgeschrieben. Fehlt das Feld ganz
    oder ist es kein SemVer (z.B. `unbekannt`), startet der Skill bei `1.0.0` und
-   ergaenzt das Feld. Mit `--no-version-bump` bleibt alles wie es ist.
+   ergaenzt das Feld. Mit `--no-version-bump` bleibt alles wie es ist. Liegt eine
+   `SKILL.en.md` daneben, bekommt sie dieselbe Version.
 3. **Spiegeln** — Der Skill-Ordner wird nach `<repo>/<skill-name>/` gespiegelt.
    Dauerhaft ausgeschlossen: `.git/`, `venv/`, `.venv/`, `node_modules/`,
    `__pycache__/`, `ms-playwright/`, `.DS_Store` — dazu `*.pyc`, `*.log` und
@@ -115,7 +116,9 @@ cd ~/.claude/skills/skill-creator/scripts && python3 -m unittest test_publish_sk
    entfernen laesst. Symlinks gelten immer als Treffer `(symlink)`: Der Spiegel kopiert
    Inhalte und legt nie selbst Links an, ein Link im Ziel ist also fremd. Ist das
    Spiegelziel, ein Elternordner bis zum Repo oder ein Eintrag darin ein Symlink, bricht
-   der Spiegel (privat wie oeffentlich) vor jedem Schreiben ab. Sonst Spiegel nach `<oeffentlich_repo>/skills/<name>/`
+   der Spiegel (privat wie oeffentlich) vor jedem Schreiben ab, also vor dem Versionssprung.
+   Inhalte von Ausschlussordnern wie `venv/` und `node_modules/` prueft er nicht, weil der
+   Spiegel dort nichts schreibt. Sonst Spiegel nach `<oeffentlich_repo>/skills/<name>/`
    (Veraltetes wird geloescht) und Commit `skills/<name>: <nachricht>`. Gepusht wird
    nie; das bleibt eine bewusste Handlung. Fehlt die Sperrliste oder ist sie leer,
    endet das Skript mit Exit 2.
@@ -153,8 +156,10 @@ Das Skript kann die Struktur liefern, nicht das Wissen.
   (erlaubt: Buchstaben, Ziffern, `.`, `_`, `-`, vorn Buchstabe oder Ziffer).
 - Vorbedingungen werden vor dem ersten Schreiben geprueft: Doku-Ordner
   `<vault>/03 Bereiche/Skills` (wenn `vault` gesetzt), `skill_repo` ist ein git-Repo oder
-  existiert noch nicht (dann `git init`), `oeffentlich_repo` ist ein git-Repo. Fehlt
-  etwas, Exit 2 ohne Versionssprung und ohne Commit.
+  existiert noch nicht (dann `git init`), `oeffentlich_repo` ist ein git-Repo,
+  `--create-remote` hat `skill_remote` oder schon ein `origin`. Fehlt etwas, Exit 2 ohne
+  Versionssprung und ohne Commit. Ein Symlink in einem Spiegelziel endet mit Exit 1,
+  ebenfalls vor dem Versionssprung.
 - Nur Python-Standardbibliothek, keine externen Pakete.
 
 ## Beispiele
