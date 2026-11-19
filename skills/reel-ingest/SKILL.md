@@ -1,6 +1,6 @@
 ---
 name: reel-ingest
-version: 1.5.3
+version: 1.5.4
 description: Verarbeitet Reels (Instagram, YouTube Shorts, TikTok) — per Telegram oder direkt im Chat. Zwei Modi: ohne Praefix wird die gezeigte Technik in einem Projekt auf einem eigenen Branch umgesetzt; mit Praefix "design:" wird das Reel nur analysiert (Farbpalette mit Hex-Werten, Schrift-Einschaetzung, Hook-Aufbau, Schnittrhythmus, Transkript) und nichts gebaut. Nutzen, sobald ein Link auf instagram.com/reel, youtube.com/shorts oder tiktok.com kommt, ein Video-Anhang ankommt, oder ein lokaler Videopfad zur Analyse genannt wird. Dritter Modus "Sammeln": viele gespeicherte Reels (Instagram-DMs des Lesekontos, Sammlung, Linkliste) zu wenigen wiederverwendbaren Skills buendeln statt ein Skill je Reel. Nicht nutzen bei Praefix "fyi:".
 ---
 
@@ -12,7 +12,7 @@ description: Verarbeitet Reels (Instagram, YouTube Shorts, TikTok) — per Teleg
 python3 -c 'import json,os;print(os.path.expanduser(json.load(open(os.path.expanduser("~/.config/claude-skills/einstellungen.json")))["vault"]))'
 ```
 
-Fehlt die Datei oder der Schlüssel, frag nach dem Pfad. Fehlt die Datei, lege sie mit `{"vault": "<Pfad>"}` an. Fehlt nur der Schlüssel, ergänze ihn in der bestehenden Datei und lass alle anderen Schlüssel unverändert.
+Fehlt die Datei oder der Schlüssel oder ist der Wert leer, frag nach dem Pfad. Fehlt die Datei, lege sie mit `{"vault": "<Pfad>"}` an. Sonst trag den Pfad unter `vault` in die bestehende Datei ein und lass alle anderen Schlüssel unverändert.
 
 # Reel-Ingest
 
