@@ -20,11 +20,20 @@ Ordner nach `~/.claude/skills/launch-check/` kopieren (Befehle im Abschnitt "Ski
 ## Umfang
 
 - **Vorher:** Styleguide-PDF, Stil beim Namen, eine Aktionsfarbe, Komponentenbasis, Muster fuer Loeschen.
-- **Pruefen:** A von aussen (curl, dig, nc), B von Hand (Wegwerf-Mail, zweites Konto), C Code-Audit (Secrets auch im Git-Verlauf, Rechte serverseitig, Zahlungen, Uploads), D KI-Spuren, E Auffindbarkeit, F Konversion und Recht (DE).
+- **Pruefen:** A von aussen (curl, dig, nc), B von Hand (Wegwerf-Mail, zweites Konto), C Code-Audit (Secrets auch im Git-Verlauf, Rechte serverseitig, Mandantentrennung mit Beleg, erfundene Pakete, Backup mit Rueckspielprobe, Zahlungen, Uploads), D KI-Spuren, E Auffindbarkeit, F Konversion und Recht (DE).
 
 ## Hintergrund
 
 Aus rund 20 Instagram-Reels (Stand 10/2026), gebuendelt im Sammelmodus von reel-ingest. Befehlsblock am 30.10.2026 gegen example.com getestet; H1-Zaehlung mit Gegentest (zwei H1 in einer Zeile).
+
+Version 1.2.0 (24.11.2026) prueft eine 18-Punkte-Sicherheitsliste aus einem weiteren Reel gegen den Skill. Die Pruefwege stammen aus der Supabase- und OWASP-Doku, nicht aus dem Reel. Gegentest mit Sonnet an zwei Test-Repos (Next.js plus Supabase, mehrere Mandanten, eingebaute Luecken), je drei Laeufe pro Fassung:
+
+- Backup als Pruefpunkt: alt 1 von 6 (nur nebenbei beim Loeschkonzept, ohne Rueckspielprobe), neu 6 von 6 (Free Plan rot, Pro ohne Rueckspielprobe ungeprueft).
+- Mandantentrennung ohne Test: alt 3 von 3 gruen allein wegen `enable row level security`, neu 3 von 3 ungeprueft oder rot.
+- Erfundenes npm-Paket: alt 2 von 3 rot, neu 3 von 3 rot mit 404-Beleg aus `npm view`.
+- Nicht aufgenommen, weil schon die alte Fassung 3 von 3 fand: Tabelle ohne RLS, Mass Assignment (auch direkt per REST), View ohne `security_invoker`, `security definer`-Funktion, `node-serialize`, Shell-Befehl mit Nutzerwert, Admin-Seite ohne Rollenpruefung.
+
+Endfassung danach mit vier weiteren Laeufen bestaetigt.
 
 ## Dateistruktur
 

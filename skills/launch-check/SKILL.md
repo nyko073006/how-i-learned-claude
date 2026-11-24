@@ -8,7 +8,7 @@ description: >
   Vorgaben vor dem Bauen gegen generisches KI-Design. Nutzen bei "launch check", "vor dem Livegang",
   "ist die Seite fertig", "Website pruefen", "vibe-coded app absichern", "go-live", "bevor wir launchen",
   "sieht das nach KI aus", "Design-Vorgaben fuer die neue Seite".
-version: 1.1.2
+version: 1.2.0
 user-invocable: true
 ---
 
@@ -113,6 +113,11 @@ Sicherheitsfehler entstehen meist aus fehlendem Kontext, nicht aus schlechtem Co
   Bericht oder Chat kopieren, nur Commit und Datei nennen). Kurzlebige Zugangsdaten statt langlebiger Schluessel, wo moeglich.
 - **Rechte nur serverseitig:** jede Route prueft Anmeldung und Besitz; Row Level Security an; Preis,
   Rolle, Rabatt und Besitzer-ID nie aus dem Client uebernehmen.
+- **Mandantentrennung:** `enable row level security` in den Migrationen ist kein Beleg. Gruen erst
+  mit pgTAP-Test je Tabelle unter `supabase/tests/`, der Erlauben und Verweigern fuer `anon` und
+  `authenticated` prueft (`supabase test db`), oder mit der Zwei-Konten-Gegenprobe (B4). Am echten
+  Projekt muss `select tablename from pg_tables where schemaname = 'public' and not rowsecurity;`
+  leer sein (Security Advisor, Lint `0013_rls_disabled_in_public`). Sonst `ungeprueft`.
 - **Rate Limiting:** oeffentliche Endpunkte (Login, Registrierung, Passwort-Reset, Formulare) per IP,
   denn dort ist noch niemand angemeldet; angemeldete Endpunkte zusaetzlich per Nutzer. Antwort 429.
 - **Eingaben:** serverseitig validieren; SQL nur parametrisiert; Nutzerinhalt nie als rohes HTML.
@@ -125,8 +130,17 @@ Sicherheitsfehler entstehen meist aus fehlendem Kontext, nicht aus schlechtem Co
   Doppelverarbeitung, dann anhaengen. Siehe [[2026-08-15 Payment-Architektur — Idempotenz, Ledger, Webhooks]].
 - **KI-Funktionen:** Nutzereingaben gegen Prompt-Injection filtern, personenbezogene Daten in
   Ausgaben maskieren, Werkzeugrechte je Aufgabe (lesen/schreiben/ausfuehren getrennt).
-- **Betrieb:** Abhaengigkeiten scannen (`npm audit`), Fehler-Tracking, Audit-Log fuer Rechte- und
-  Zahlungsaenderungen, Loeschkonzept, das wirklich loescht.
+- **Pakete:** `npm audit` findet nur bekannte Luecken, keine erfundenen Pakete. Jede Abhaengigkeit
+  gegen die Registry pruefen: `npm view <paket> name time.created repository.url`. 404 heisst: von
+  der KI erfunden, nie installieren, denn Angreifer registrieren solche Namen (Slopsquatting). Wenige
+  Wochen alt oder ohne Repo: verdaechtig. Installieren mit `npm ci` aus dem Lockfile,
+  `ignore-scripts=true` in `.npmrc` (OWASP NPM Security Cheat Sheet).
+- **Backup:** Supabase sichert taeglich erst ab dem Pro-Plan (7 Tage), Free gar nicht; dort
+  regelmaessig `supabase db dump` an einen anderen Ort. Dateien im Storage stecken in keinem
+  Datenbank-Backup. Gruen erst nach einer Rueckspielprobe (Backup in ein neues Projekt oder eine
+  lokale Datenbank, Zeilen zaehlen); ohne Probe `ungeprueft`.
+- **Betrieb:** Fehler-Tracking, Audit-Log fuer Rechte- und Zahlungsaenderungen, Loeschkonzept, das
+  wirklich loescht.
 
 Die Liste ersetzt keinen Pentest; bei Zahlungen und Gesundheits- oder Sozialdaten einen anbieten.
 
@@ -167,3 +181,5 @@ Je Punkt eine Zeile: `rot | gruen | ungeprueft` — Punkt — Beleg (Befehl und 
 
 Reel-Notiz [[2026-10-30 Reel-Sammlung 134 Reels zu Skills]]; Vorgaengernotizen
 [[2026-08-15 Stehende Sicherheitsregeln und Zugriffsmatrix]], Themenseite [[Sicherheit und KI-Agenten]].
+Pruefwege in C (Stand 11/2026): Supabase-Doku Row Level Security, Database Advisors und Database
+Backups; OWASP NPM Security Cheat Sheet.
