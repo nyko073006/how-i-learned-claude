@@ -4,11 +4,13 @@ description: >
   Prueft eine KI-gebaute Website oder Web-App vor dem Livegang: von aussen per Befehl (Header, offene
   Ports, leerer Quelltext, robots/sitemap/llms.txt, Mail-Faelschungsschutz), per Hand (Registrierung mit
   Wegwerf-Mail), als Code-Audit (Secrets auch im Git-Verlauf, serverseitige Rechte, Zahlungen, Uploads)
-  und auf KI-Spuren, SEO und Konversion. Liefert eine Rot/Gruen-Liste mit Beleg je Punkt. Ausserdem
+  und auf KI-Spuren, SEO (auch ueber alle Seiten: verwaiste, duenne und konkurrierende Seiten) und
+  Konversion. Liefert eine Rot/Gruen-Liste mit Beleg je Punkt. Ausserdem
   Vorgaben vor dem Bauen gegen generisches KI-Design. Nutzen bei "launch check", "vor dem Livegang",
   "ist die Seite fertig", "Website pruefen", "vibe-coded app absichern", "go-live", "bevor wir launchen",
-  "sieht das nach KI aus", "Design-Vorgaben fuer die neue Seite".
-version: 1.2.0
+  "sieht das nach KI aus", "Design-Vorgaben fuer die neue Seite", "verwaiste Seiten",
+  "Keyword-Kannibalisierung".
+version: 1.3.0
 user-invocable: true
 ---
 
@@ -150,14 +152,37 @@ Rot ist jeder dieser Punkte: Emojis als Icons; lila Verlauf im Hero; KI-Standard
 the power of ..."), Fuellsaetze; erfundene Testimonials oder Logos; Live-Adresse `*.vercel.app`,
 `*.netlify.app` statt eigener Domain; Stockfotos statt echter Fotos; ueberall gleicher Seitentitel.
 
-## E. Auffindbarkeit (je Seite)
+## E. Auffindbarkeit (je Seite und ueber alle Seiten)
 
-Eigener Titel, Meta-Description, OG-Bild, Canonical, genau ein H1, `lang`, Alt-Texte, Favicon,
+Je Seite: eigener Titel, Meta-Description, OG-Bild, Canonical, genau ein H1, `lang`, Alt-Texte, Favicon,
 strukturierte Daten (Organisation, Leistung, FAQ). Google Search Console eingerichtet.
 **Wortwahl aus ChatGPT abschauen:** Frage zum eigenen Angebot in ChatGPT mit Websuche stellen,
 Chat-ID aus der URL (nach `/c/`) kopieren, DevTools > Netzwerk, ID als Filter, neu laden, Eintrag
 anklicken, Reiter Response, nach `queries` suchen. Diese Suchbegriffe in Titel, Slug, H1 und erste
 Saetze. (Interne Schnittstelle, kann sich jederzeit aendern.)
+
+**Ueber alle Seiten** (Seiten aus der Sitemap laut robots.txt, sonst `/sitemap.xml`, nicht nur die Startseite). Skript neben dieser
+Datei, nur Standardbibliothek; liest, was ein Crawler ohne JavaScript sieht:
+
+```bash
+python3 scripts/seitenstruktur.py "$URL"
+```
+
+Es listet je Seite Woerter im Hauptinhalt, eingehende interne Links, Titel und H1 und meldet
+`VERWAIST`, `NICHT IN SITEMAP`, `DUENN` und die aehnlichsten Seitenpaare (`AEHNLICH`). Das sind
+Kandidaten; das Urteil faellt nach Lesen der Seiten.
+
+| Befund | Rot, wenn |
+|---|---|
+| Verwaiste Seite | `VERWAIST`: Seite steht in der Sitemap, keine andere Seite verlinkt sie. Google: "Every page you care about should have a link from at least one other page on your site." `NICHT IN SITEMAP` allein ist nicht rot, aber zu nennen; noindex-Seiten (Danke, Warenkorb) fehlen dort zu Recht |
+| Keyword-Kannibalisierung | Zwei Seiten zielen auf dieselbe Suchanfrage, auch umformuliert ("Steuerberater Ulm" und "Steuerberatung in Ulm beauftragen"). Je Seite den Hauptsuchbegriff in einer Zeile aus Titel, H1 und erstem Absatz notieren und vergleichen; ein `AEHNLICH`-Paar deutlich ueber den uebrigen ist ein starker Hinweis. Verschiedene Suchabsichten (Leistungsseite und Kosten-Ratgeber) sind keine Kannibalisierung. Nach dem Livegang belegen: Search Console > Leistung > Suchanfrage filtern > Reiter Seiten, mehr als eine URL mit Impressionen |
+| Duenne Seite | `DUENN` und die Seite beantwortet die Frage ihres Suchbegriffs nicht selbst (Leistungsseite mit zwei Saetzen). Impressum, Datenschutz, Kontakt und reine Uebersichtsseiten sind kurz und richtig: nicht rot. Eine Mindestwortzahl gibt es bei Google nicht ("No, we don't"); die Schwelle `--duenn` (Vorgabe ein Drittel des Medians) sucht nur Kandidaten |
+
+Abhilfe in den Bericht schreiben, nicht ungefragt umsetzen: Ueberlappende Seiten zusammenlegen, also
+die staerkere URL behalten, den Inhalt der schwaecheren einarbeiten, 301 von alt auf neu, interne
+Links umbiegen, alte URL aus der Sitemap. Duenne Seite mit eigenem Suchbegriff ausbauen, sonst
+einarbeiten. Verwaiste Seite verlinken oder entfernen. Bei SPA ohne Vorrendern zeigt das Skript
+ueberall 0 Woerter; dann gilt der rote Befund aus A.
 
 ## F. Konversion
 
@@ -182,4 +207,5 @@ Je Punkt eine Zeile: `rot | gruen | ungeprueft` — Punkt — Beleg (Befehl und 
 Reel-Notiz [[2026-10-30 Reel-Sammlung 134 Reels zu Skills]]; Vorgaengernotizen
 [[2026-08-15 Stehende Sicherheitsregeln und Zugriffsmatrix]], Themenseite [[Sicherheit und KI-Agenten]].
 Pruefwege in C (Stand 11/2026): Supabase-Doku Row Level Security, Database Advisors und Database
-Backups; OWASP NPM Security Cheat Sheet.
+Backups; OWASP NPM Security Cheat Sheet. Pruefwege in E, ueber alle Seiten: Google Search Central,
+Link best practices, Creating helpful content, Consolidate duplicate URLs.
