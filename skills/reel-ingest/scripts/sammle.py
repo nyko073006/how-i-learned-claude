@@ -49,13 +49,32 @@ def einstellungen_pfad() -> str:
     return os.path.expanduser(os.environ.get(EINSTELLUNGEN_ENV, "").strip() or EINSTELLUNGEN_PFAD)
 
 
+EXIT_EINSTELLUNG = 2    # Einstellung fehlt oder Einstellungsdatei nicht lesbar
+
+
+class EinstellungenFehler(Exception):
+    """Einstellungsdatei existiert, ist aber kein lesbares JSON-Objekt."""
+
+    def __init__(self, pfad: str, grund: object):
+        super().__init__(f"FEHLER Einstellungsdatei {pfad} nicht lesbar: {grund}")
+
+
 def einstellungen() -> dict:
-    """Einstellungen frisch gelesen; fehlt die Datei oder ist sie unlesbar, {}."""
+    """Einstellungen frisch gelesen; fehlt die Datei, {}; kaputt oder kein Objekt: EinstellungenFehler."""
+    pfad = einstellungen_pfad()
     try:
-        daten = json.loads(Path(einstellungen_pfad()).read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+        daten = json.loads(Path(pfad).read_text(encoding="utf-8"))
+    except FileNotFoundError:
         return {}
-    return daten if isinstance(daten, dict) else {}
+    except OSError as e:        # ASSUMPTION: andere Lesefehler (Rechte, Verzeichnis) wie kaputtes JSON melden, weil auch sie nicht "fehlt" heissen
+        raise EinstellungenFehler(pfad, e.strerror or e) from e
+    except ValueError as e:     # kaputtes JSON oder UnicodeDecodeError (kein UTF-8)
+        raise EinstellungenFehler(pfad, e) from e
+    except RecursionError as e:  # sehr tief verschachteltes JSON
+        raise EinstellungenFehler(pfad, "JSON zu tief verschachtelt") from e
+    if not isinstance(daten, dict):
+        raise EinstellungenFehler(pfad, "Wurzel ist kein JSON-Objekt")
+    return daten
 
 
 def chrome_profil() -> str:
@@ -290,6 +309,14 @@ def steckbrief(ordner: Path) -> Path:
 
 
 def main() -> int:
+    try:
+        return _main()
+    except EinstellungenFehler as e:   # eine Stelle fuer jeden Befehl, der einstellungen() liest
+        print(e, file=sys.stderr)
+        return EXIT_EINSTELLUNG
+
+
+def _main() -> int:
     p = argparse.ArgumentParser()
     sub = p.add_subparsers(dest="befehl", required=True)
     dm = sub.add_parser("dm")
@@ -306,7 +333,7 @@ def main() -> int:
     if a.befehl == "dm":
         if not chrome_profil():
             print(f"FEHLER reel_chrome_profil fehlt in {einstellungen_pfad()}", file=sys.stderr)
-            return 2
+            return EXIT_EINSTELLUNG
         print("\n".join(links_aus_dm(a.chat)))
     elif a.befehl == "export":
         links = links_aus_export(a.zip, a.seit, a.bekannt)
@@ -319,6 +346,9 @@ def main() -> int:
             except Exception as e:  # noqa: BLE001
                 try:                # Bild- oder Karussell-Post: yt-dlp findet kein Video
                     print(hole_bilder(url), flush=True)
+                except EinstellungenFehler:
+                    # ASSUMPTION: hole bricht bei kaputter Einstellungsdatei ganz ab, weil kein Bild-Post ohne Profil holbar ist und der Brief eine Stelle fuer jeden Befehl verlangt
+                    raise
                 except Exception as e2:  # noqa: BLE001
                     print(f"FEHLER {url}: {str(e)[:200]} | Bilder: {str(e2)[:200]}", flush=True)
     elif a.befehl == "steckbrief":

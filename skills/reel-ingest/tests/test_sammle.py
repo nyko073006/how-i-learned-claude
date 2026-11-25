@@ -133,3 +133,97 @@ def test_dm_mit_profil_laeuft(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(sys, "argv", ["sammle.py", "dm"])
     assert sammle.main() == 0
     assert "https://www.instagram.com/reel/X/" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("inhalt", ["{kaputt", "[1, 2]"])
+def test_dm_mit_kaputter_einstellungsdatei_meldet_nicht_lesbar(tmp_path, monkeypatch, capsys, inhalt):
+    pfad = tmp_path / "einstellungen.json"
+    pfad.write_text(inhalt, encoding="utf-8")
+    monkeypatch.setenv("CLAUDE_SKILLS_EINSTELLUNGEN", str(pfad))
+    aufrufe = []
+    monkeypatch.setattr(sammle, "links_aus_dm", lambda chat=None: aufrufe.append(chat) or [])
+    monkeypatch.setattr(sys, "argv", ["sammle.py", "dm"])
+    assert sammle.main() == 2
+    assert aufrufe == []
+    out = capsys.readouterr()
+    assert f"FEHLER Einstellungsdatei {pfad} nicht lesbar" in out.err
+    assert "reel_chrome_profil fehlt" not in out.out + out.err
+
+
+def test_dm_ohne_einstellungsdatei_meldet_weiter_profil_fehlt(tmp_path, monkeypatch, capsys):
+    pfad = tmp_path / "gibt-es-nicht.json"
+    monkeypatch.setenv("CLAUDE_SKILLS_EINSTELLUNGEN", str(pfad))
+    monkeypatch.setattr(sys, "argv", ["sammle.py", "dm"])
+    assert sammle.main() == 2
+    out = capsys.readouterr()
+    assert f"FEHLER reel_chrome_profil fehlt in {pfad}" in out.err
+    assert "nicht lesbar" not in out.out + out.err
+
+
+def _dm_meldung(monkeypatch, capsys, pfad, befehl=("dm",)):
+    monkeypatch.setenv("CLAUDE_SKILLS_EINSTELLUNGEN", str(pfad))
+    monkeypatch.setattr(sys, "argv", ["sammle.py", *befehl])
+    code = sammle.main()
+    out = capsys.readouterr()
+    return code, out
+
+
+def test_kaputte_einstellungsdatei_nennt_grund(tmp_path, monkeypatch, capsys):
+    pfad = tmp_path / "einstellungen.json"
+    pfad.write_text("{kaputt", encoding="utf-8")
+    code, out = _dm_meldung(monkeypatch, capsys, pfad)
+    grund = out.err.split("nicht lesbar: ", 1)[1].strip()
+    assert code == 2 and grund
+
+
+def test_einstellungspfad_ist_verzeichnis_nicht_lesbar(tmp_path, monkeypatch, capsys):
+    pfad = tmp_path / "verzeichnis.json"
+    pfad.mkdir()
+    code, out = _dm_meldung(monkeypatch, capsys, pfad)
+    assert code == 2
+    assert f"FEHLER Einstellungsdatei {pfad} nicht lesbar" in out.err
+    assert "reel_chrome_profil fehlt" not in out.err
+
+
+def test_einstellungsdatei_kein_utf8_nicht_lesbar(tmp_path, monkeypatch, capsys):
+    pfad = tmp_path / "einstellungen.json"
+    pfad.write_bytes(b"\xff\xfe\x00{")
+    code, out = _dm_meldung(monkeypatch, capsys, pfad)
+    assert code == 2
+    assert f"FEHLER Einstellungsdatei {pfad} nicht lesbar" in out.err
+
+
+def test_einstellungsdatei_leeres_objekt_meldet_profil_fehlt(tmp_path, monkeypatch, capsys):
+    pfad = tmp_path / "einstellungen.json"
+    pfad.write_text("{}", encoding="utf-8")
+    code, out = _dm_meldung(monkeypatch, capsys, pfad)
+    assert code == 2
+    assert f"FEHLER reel_chrome_profil fehlt in {pfad}" in out.err
+    assert "nicht lesbar" not in out.err
+
+
+def test_einstellungsdatei_tief_verschachtelt_nicht_lesbar(tmp_path, monkeypatch, capsys):
+    pfad = tmp_path / "einstellungen.json"
+    pfad.write_text("[" * 100000, encoding="utf-8")
+    try:
+        code, out = _dm_meldung(monkeypatch, capsys, pfad)
+    except RecursionError:
+        pytest.fail("Traceback (RecursionError) statt Meldung 'nicht lesbar'")
+    assert code == 2
+    assert f"FEHLER Einstellungsdatei {pfad} nicht lesbar" in out.err
+
+
+def test_hole_mit_kaputter_einstellungsdatei_bricht_ab(tmp_path, monkeypatch, capsys):
+    pfad = tmp_path / "einstellungen.json"
+    pfad.write_text("{kaputt", encoding="utf-8")
+    # Rueckfall auf Bild-Posts: yt-dlp-Weg scheitert, hole_bilder liest das Profil
+    def kein_video(url):
+        raise RuntimeError("kein Video")
+    monkeypatch.setattr(sammle, "hole", kein_video)
+    # Testsperre: faellt einstellungen() je wieder auf {} zurueck, darf kein echtes gallery-dl ins Netz gehen
+    monkeypatch.setattr(sammle, "GALLERY_DL", tmp_path / "kein-gallery-dl")
+    code, out = _dm_meldung(monkeypatch, capsys, pfad,
+                            ("hole", "https://www.instagram.com/p/ABC123/"))
+    assert code == 2
+    assert f"FEHLER Einstellungsdatei {pfad} nicht lesbar: " in out.err
+    assert out.out == ""

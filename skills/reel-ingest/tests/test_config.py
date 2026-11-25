@@ -22,7 +22,7 @@ def test_registry_beispiel_vollstaendig():
     text = (WURZEL / "references" / "projekte.beispiel.md").read_text()
     assert "| Projekt | Pfad | Wofuer | Passt bei Reels ueber |" in text
     # Die Regel muss in der Registry stehen, weil das Modell nur sie liest.
-    assert "kein Ausweichziel" in text.lower() or "Ausweichziel" in text
+    assert "kein ausweichziel" in text.lower()
     zeilen = [z for z in text.splitlines() if z.startswith("| ") and "---" not in z]
     assert len(zeilen) == 4  # Kopf plus drei Beispielprojekte
     assert "Terminplaner-App" in text

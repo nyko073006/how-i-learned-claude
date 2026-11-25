@@ -2,6 +2,8 @@ import os
 import subprocess
 from pathlib import Path
 
+import pytest
+
 WURZEL = Path(__file__).parent.parent
 WAECHTER = WURZEL / "hooks" / "reel_guard.sh"
 
@@ -33,6 +35,10 @@ def test_reel_link_ohne_telegram_wird_ignoriert(tmp_path):
     assert e.stdout.strip() == ""
 
 
+@pytest.mark.skipif(
+    not (WURZEL / "venv" / "bin" / "python").exists(),
+    reason="Im Checkout fehlt venv/ (hooks/reel_guard.sh ruft $WURZEL/venv/bin/python auf); "
+           "nur in der installierten Fassung lauffaehig")
 def test_fyi_praefix_wird_ignoriert(tmp_path):
     nutzlast = ('{"prompt": "<channel source=\\"telegram\\"> fyi: '
                 'https://www.youtube.com/shorts/abc"}')

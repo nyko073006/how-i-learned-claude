@@ -1,6 +1,6 @@
 ---
 name: reel-ingest
-version: 1.5.4
+version: 1.5.5
 description: Verarbeitet Reels (Instagram, YouTube Shorts, TikTok) — per Telegram oder direkt im Chat. Zwei Modi: ohne Praefix wird die gezeigte Technik in einem Projekt auf einem eigenen Branch umgesetzt; mit Praefix "design:" wird das Reel nur analysiert (Farbpalette mit Hex-Werten, Schrift-Einschaetzung, Hook-Aufbau, Schnittrhythmus, Transkript) und nichts gebaut. Nutzen, sobald ein Link auf instagram.com/reel, youtube.com/shorts oder tiktok.com kommt, ein Video-Anhang ankommt, oder ein lokaler Videopfad zur Analyse genannt wird. Dritter Modus "Sammeln": viele gespeicherte Reels (Instagram-DMs des Lesekontos, Sammlung, Linkliste) zu wenigen wiederverwendbaren Skills buendeln statt ein Skill je Reel. Nicht nutzen bei Praefix "fyi:".
 ---
 
