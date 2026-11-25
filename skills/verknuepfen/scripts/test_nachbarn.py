@@ -313,17 +313,26 @@ class Runner(Basis):
     def test_frist_beendet_auch_kinder(self):
         d = self.tmp()
         pidf = os.path.join(d, "kind.pid")
-        prog = fake_programm(d, "sleep 20 &\necho $! > '%s'\nsleep 20" % pidf)
+        # Die PID-Datei entsteht per mv in einem Stück: nie halb geschrieben, wenn die Frist dazwischenfährt.
+        prog = fake_programm(d, "sleep 20 &\necho $! > '%s.neu'\nmv '%s.neu' '%s'\nsleep 20" % (pidf, pidf, pidf))
         import time
-        t0 = time.time()
-        with mock.patch.object(nb, "NODE", prog):
-            with self.assertRaises(nb.NachbarnFehler) as c:
-                nb.qmd_runner("i", "a", 0.5)
-        self.assertLess(time.time() - t0, 5)  # ohne Gruppenkill wartet communicate auf das Kind
-        self.assertIn("Frist", str(c.exception))
+        # Unter Last startet das Programm manchmal später, als die Frist dauert. Dann fehlt die PID-Datei, und der
+        # Lauf sagt nichts über das Kind. Deshalb die Frist verdoppeln, bis das Programm sein Kind gemeldet hat.
+        for frist in (0.5, 1, 2, 4, 8):
+            t0 = time.time()
+            with mock.patch.object(nb, "NODE", prog):
+                with self.assertRaises(nb.NachbarnFehler) as c:
+                    nb.qmd_runner("i", "a", frist)
+            # ohne Gruppenkill wartet communicate auf das Kind (20 s)
+            self.assertLess(time.time() - t0, frist + 4.5)
+            self.assertIn("Frist", str(c.exception))
+            if os.path.exists(pidf):
+                break
+        else:
+            self.fail("Programm kam auch mit 8 s Frist nicht bis zur PID-Datei")
         with open(pidf) as fh:
             pid = int(fh.read())
-        for _ in range(50):
+        for _ in range(100):
             try:
                 os.kill(pid, 0)
             except ProcessLookupError:

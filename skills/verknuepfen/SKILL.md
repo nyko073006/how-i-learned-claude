@@ -6,7 +6,7 @@ description: >
   Verwenden wenn der Nutzer "verknuepfen", "verlinke die notiz", "entitaeten verlinken", "link entities",
   "knowledge graph", "neue entitaeten", "kandidaten", "link note", "interlink" sagt, nach dem Schreiben
   einer Vault-Notiz und am Session-Ende vor der Daily Note.
-version: 1.2.4
+version: 1.2.5
 user-invocable: true
 allowed-tools:
   - Read

@@ -5,7 +5,7 @@ description: >
   on first mentions and proposes new entities and relations.
   Use when the user says "verknuepfen", "link the note", "link entities", "knowledge graph", "new entities",
   "candidates", "interlink", after writing a vault note, and at session end before the daily note.
-version: 1.2.4
+version: 1.2.5
 user-invocable: true
 allowed-tools:
   - Read
