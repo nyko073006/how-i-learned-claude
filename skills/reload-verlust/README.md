@@ -38,7 +38,7 @@ python3 -I ~/.claude/skills/reload-verlust/scripts/reload_verlust.py --zeit "202
 |--------|-----------|
 | `--zeit` | Zeitpunkt des Neuladens, `HH:MM` (heute) oder `JJJJ-MM-TT HH:MM`. Vorgabe: Start des Obsidian-Prozesses. Bei `plugin:reload` laeuft der Prozess weiter, dann angeben. |
 | `--stunden` | Rueckblick vor dem Neustart, Vorgabe 12 |
-| `--repos` | Ordner mit Git-Repos (eine Ebene tief), mehrfach; Vorgabe `repo_wurzeln` aus `~/.config/claude-skills/einstellungen.json`, sonst `~/Developer` |
+| `--repos` | Ordner mit Git-Repos (eine Ebene tief), mehrfach; Vorgabe `repo_wurzeln` aus `~/.config/claude-skills/einstellungen.json`, sonst `~/Developer` (nur wenn der Schluessel fehlt oder `null` ist; ein falscher Wert, `[]` oder ein leerer Pfad endet mit Exit 2) |
 | `--projects`, `--cockpit` | Pfade zu Transkripten (`~/.claude/projects`), Cockpit-Statusdateien (`~/.claude/cockpit`) |
 | `--vault` | Vault-Pfad; Vorgabe `vault` aus `~/.config/claude-skills/einstellungen.json`. Fehlt beides oder gibt es den Ordner nicht, bricht das Skript mit Exit 2 und Klartext ab. |
 

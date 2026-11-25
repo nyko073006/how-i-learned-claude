@@ -7,7 +7,7 @@ description: >
   Worktrees liegt und ob Obsidian die Markierung CLAUDE_CODE_CHILD_SESSION geerbt hat. Liest nur.
   Verwenden bei "was ist beim reload verloren gegangen", "was hat der neustart zerschossen",
   "wo waren wir", "reload-verlust", "welche sitzungen sind weg", "tabs nach neustart pruefen".
-version: 1.1.3
+version: 1.1.4
 user-invocable: true
 allowed-tools:
   - Bash
@@ -78,7 +78,7 @@ lange davor nichts mehr ins Transkript geschrieben. Dann fehlen Stunden.
 |--------|-----------|
 | `--zeit HH:MM` oder `--zeit "JJJJ-MM-TT HH:MM"` | Zeitpunkt des Neuladens; Vorgabe: Start des Obsidian-Prozesses |
 | `--stunden N` | Rueckblick vor dem Neustart, Vorgabe 12 |
-| `--repos ORDNER` | Ordner mit Git-Repos (eine Ebene tief), mehrfach; Vorgabe `repo_wurzeln` aus der Einstellungsdatei, sonst `~/Developer` |
+| `--repos ORDNER` | Ordner mit Git-Repos (eine Ebene tief), mehrfach; Vorgabe `repo_wurzeln` aus der Einstellungsdatei, sonst `~/Developer` (nur wenn der Schlüssel fehlt oder `null` ist; ein falscher Wert, `[]` oder ein leerer Pfad endet mit Exit 2) |
 | `--projects`, `--cockpit` | Pfade zu Transkripten, Cockpit-Statusdateien |
 | `--vault` | Pfad `<VAULT>`; Vorgabe `vault` aus der Einstellungsdatei, fehlt beides oder gibt es den Ordner nicht: Exit 2 mit Klartext |
 

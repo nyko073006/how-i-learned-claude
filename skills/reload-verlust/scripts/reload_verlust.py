@@ -66,13 +66,28 @@ def vault_waehlen(arg):
 
 
 def repo_wurzeln_waehlen(arg):
-    """--repos, sonst Einstellung repo_wurzeln, sonst ~/Developer; jeweils mit ~ aufgeloest."""
+    """--repos, sonst Einstellung repo_wurzeln, sonst ~/Developer (nur wenn der Schluessel fehlt); mit ~ aufgeloest.
+    Vorhanden, aber keine nichtleere Liste aus Strings: EinstellungsFehler, kein stiller Rueckfall."""
     if arg is not None:
+        # ASSUMPTION: Mit --repos wird die Einstellung nicht geprueft, weil sie dann nicht gebraucht wird.
         return [os.path.expanduser(r) for r in arg]
-    w = einstellungen().get("repo_wurzeln")
-    if isinstance(w, list) and w and all(isinstance(r, str) for r in w):
-        return [os.path.expanduser(r) for r in w]
-    return [os.path.expanduser("~/Developer")]
+    daten = einstellungen()
+    # ASSUMPTION: null zaehlt wie ein fehlender Schluessel, weil JSON null "kein Wert" bedeutet
+    w = daten.get("repo_wurzeln")
+    if w is None:
+        return [os.path.expanduser("~/Developer")]
+    # ASSUMPTION: Ein leerer oder nur aus Leerraum bestehender Pfad ist keine Wurzel und gilt als Fehler.
+    if not (isinstance(w, list) and w and all(isinstance(r, str) and r.strip() for r in w)):
+        raise EinstellungsFehler("Einstellung `repo_wurzeln` in %s muss eine nichtleere Liste aus Pfaden (Strings, nicht leer) sein, "
+                                 "gefunden: %s" % (einstellungen_pfad(), _typname(w)))
+    return [os.path.expanduser(r) for r in w]
+
+
+def _typname(wert):
+    if isinstance(wert, list):
+        return "leere Liste" if not wert else "Liste mit Nicht-Strings oder leeren Pfaden"
+    return {bool: "Wahrheitswert", int: "Zahl", float: "Zahl", dict: "Objekt", str: "String"}.get(
+        type(wert), "null" if wert is None else type(wert).__name__)
 
 
 def local(ts):

@@ -298,6 +298,40 @@ class TestEinstellungen(unittest.TestCase):
             code, aufruf, _ = self.lauf([])
         self.assertEqual(aufruf[5], ["/a/eins", "/a/zwei"])
 
+    def test_repo_wurzeln_falscher_typ_exit2(self):
+        for wert in ("~/Developer", 5, [], [1, "a"], ["a", None], {"a": 1}, True):
+            with self.subTest(wert=wert), tempfile.TemporaryDirectory() as v, \
+                    mit_einstellungen(vault=v, repo_wurzeln=wert) as pfad:
+                code, aufruf, err = self.lauf([])
+                self.assertEqual(code, 2)
+                self.assertIsNone(aufruf)
+                self.assertIn("repo_wurzeln", err)
+                self.assertIn(pfad, err)
+                self.assertNotIn("Traceback", err)
+
+    def test_repo_wurzeln_falscher_typ_egal_mit_repos_argument(self):
+        # ASSUMPTION: --repos ersetzt die Einstellung, also wird sie dann nicht geprueft, weil sie nicht gebraucht wird
+        with tempfile.TemporaryDirectory() as v, mit_einstellungen(vault=v, repo_wurzeln=5):
+            code, aufruf, _ = self.lauf(["--repos", "/b/drei"])
+        self.assertEqual(code, 0)
+        self.assertEqual(aufruf[5], ["/b/drei"])
+
+    def test_repo_wurzeln_leere_strings_exit2(self):
+        for wert in ([""], ["  "], ["/a/eins", ""]):
+            with self.subTest(wert=wert), tempfile.TemporaryDirectory() as v, \
+                    mit_einstellungen(vault=v, repo_wurzeln=wert) as pfad:
+                code, aufruf, err = self.lauf([])
+                self.assertEqual(code, 2)
+                self.assertIsNone(aufruf)
+                self.assertIn("repo_wurzeln", err)
+                self.assertIn(pfad, err)
+
+    def test_repo_wurzeln_null_nimmt_vorgabe(self):
+        with tempfile.TemporaryDirectory() as v, mit_einstellungen(vault=v, repo_wurzeln=None):
+            code, aufruf, _ = self.lauf([])
+        self.assertEqual(code, 0)
+        self.assertEqual(aufruf[5], [os.path.expanduser("~/Developer")])
+
     def test_repos_vorgabe_ohne_einstellung(self):
         with tempfile.TemporaryDirectory() as v, mit_einstellungen(vault=v):
             code, aufruf, _ = self.lauf([])
