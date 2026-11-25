@@ -292,7 +292,7 @@ def pruefe_index(db_pfad, vault, muster):
 
 
 def qmd_aufruf(index, schritt):
-    """Ein qmd-Schritt (update, embed, cleanup); Ausgabe geht durch, keine Frist (embed braucht beim
+    """Ein qmd-Schritt (update, cleanup, embed); Ausgabe geht durch, keine Frist (embed braucht beim
     ersten Mal ueber 20 Minuten). Rueckgabe ist der Exitcode."""
     try:
         return subprocess.run([QMD, "--index", index, schritt], cwd="/").returncode
@@ -372,7 +372,8 @@ def cmd_index(a, aufruf=None):
             print("  " + b, file=sys.stderr)
         return 1
     aufruf = aufruf or qmd_aufruf
-    for schritt in ("update", "embed", "cleanup"):
+    # cleanup vor embed: update setzt neu ausgeschlossene Notizen nur auf active=0, cleanup loescht die Zeilen
+    for schritt in ("update", "cleanup", "embed"):
         try:
             rc = aufruf(index, schritt)
         except NachbarnFehler as ex:
@@ -381,10 +382,13 @@ def cmd_index(a, aufruf=None):
         if rc != 0:
             print("qmd %s fehlgeschlagen (Exitcode %s)" % (schritt, rc), file=sys.stderr)
             return 1
-        if schritt == "update":  # qmd schreibt das Modell bei update zurueck: vor embed pruefen
+        if schritt == "update":  # qmd schreibt das Modell bei update zurueck
             if _yaml_nach_lauf(yaml_pfad, "nach update"):
                 return 1
-            if _index_befund(index, vault, einst, "nach update"):  # nichts Ausgeschlossenes einbetten
+        elif schritt == "cleanup":  # vor embed darf nichts Ungeprueftes liegen
+            if _yaml_nach_lauf(yaml_pfad, "nach cleanup"):
+                return 1
+            if _index_befund(index, vault, einst, "nach cleanup"):  # nichts Ausgeschlossenes einbetten
                 return 1
     if _yaml_nach_lauf(yaml_pfad, "nach dem Lauf"):
         return 1

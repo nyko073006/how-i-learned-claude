@@ -123,6 +123,7 @@ def main(argv=None):
     ap.add_argument("paarliste", metavar="PAARLISTE.md")
     a = ap.parse_args(argv)
     try:
+        vk.vl.einstellungen_vorab_pruefen()
         vault = vk.vl.vault_waehlen(a.vault)
     except vk.vl.EinstellungsFehler as ex:
         print(ex, file=sys.stderr)

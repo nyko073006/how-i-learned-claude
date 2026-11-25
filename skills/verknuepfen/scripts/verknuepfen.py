@@ -15,6 +15,7 @@ import contextlib
 import errno
 import json
 import os
+import posixpath
 import re
 import sys
 import tempfile
@@ -759,7 +760,8 @@ def _rel(v, note):
         if r == ".." or r.startswith(".." + os.sep):
             return None
         p = r
-    rel = vl.nfc(p.replace(os.sep, "/"))
+    # ./a, a//b, a/./b, a/x/../b; ein Pfad aus dem Vault (../x) steht nie in v.texts, ergibt also None
+    rel = posixpath.normpath(vl.nfc(p.replace(os.sep, "/")))
     return rel if rel in v.texts else None
 
 
@@ -832,8 +834,8 @@ def main(argv=None):
     ix.add_argument("--vault", default=None, help="Vorgabe: Einstellung vault")
     a = ap.parse_args(argv)
     try:
+        vl.einstellungen_vorab_pruefen()
         a.vault = vl.vault_waehlen(a.vault)
-        vl.dienst_ordner()  # Einstellungsdatei einmal vorab pruefen: Fehler als Klartext, nicht mitten im Lauf
     except vl.EinstellungsFehler as ex:
         print(ex, file=sys.stderr)
         return 2

@@ -86,7 +86,7 @@ Sperrliste: Ein von Hand entfernter Link kommt nicht zurueck. Parallele Laeufe t
 
 Am Session-Ende erst `index`, dann `nachbarn` je geschriebener Notiz.
 
-`index` schreibt `~/.config/qmd/<index>.yml` aus den Einstellungen, ruft `qmd update`, `embed` und `cleanup` und prueft
+`index` schreibt `~/.config/qmd/<index>.yml` aus den Einstellungen, ruft `qmd update`, `cleanup` und `embed` und prueft
 danach den Index auf ausgeschlossene Pfade und fremde Collections. Der erste Lauf dauert lange (24 Minuten fuer etwa
 1.300 Notizen auf einem M-Mac), danach nur geaenderte Notizen (Sekunden). Liegt unter dem Namen schon eine fremde
 qmd-Konfiguration (andere Collection, anderer `path`, eigene Schluessel wie `global_context`), bricht `index` mit Exit 1 ab

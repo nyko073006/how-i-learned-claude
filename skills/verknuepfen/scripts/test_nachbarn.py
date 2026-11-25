@@ -832,6 +832,16 @@ class Cli(Basis):
         self.assertEqual(code, 0)
         self.assertEqual(out.strip(), "Schritt 4 übersprungen: Schwelle nicht geeicht")
 
+    def test_cli_punkt_schraegstrich_und_ausbruch(self):
+        d = self.bau({AUS: FM + "Kappa.\n"})
+        e = os.path.join(self.tmp(), "nicht-da.json")
+        with mock.patch.dict(os.environ, {"VERKNUEPFEN_EINSTELLUNGEN": e}):
+            code, out = self.lauf(["nachbarn", "--vault", d, "./" + AUS])
+            self.assertEqual(code, 0)
+            self.assertEqual(out.strip(), "Schritt 4 übersprungen: Schwelle nicht geeicht")
+            code, _ = self.lauf(["nachbarn", "--vault", d, "../" + AUS])
+            self.assertEqual(code, 1)
+
     def test_cli_vorschlaege_und_json(self):
         ziel = "03 Bereiche/Notizen/Ziel.md"
         d = self.bau({AUS: FM + "Kappa.\n", ziel: "x\n"})
@@ -886,7 +896,7 @@ class Cli(Basis):
 class Index(Basis):
     """verknuepfen.py index mit gefaktem qmd (nb.qmd_aufruf); Pfade nur in Wegwerf-Ordnern."""
 
-    def aufbau(self, rc=None, db_zeilen=None, nach_update=None):
+    def aufbau(self, rc=None, db_zeilen=None, nach_update=None, cleanup_loescht=True):
         self.vault = self.bau({AUS: FM + "Kappa.\n"})
         # die YAML aus Basis.setUp zeigt auf /x/vault und waere eine fremde Konfiguration
         os.remove(os.path.join(self.cfg, "vault.yml"))
@@ -907,6 +917,11 @@ class Index(Basis):
                 con.close()
                 if nach_update:
                     nach_update()
+            if schritt == "cleanup" and cleanup_loescht:  # qmd cleanup: DELETE FROM documents WHERE active = 0
+                con = sqlite3.connect(self.db)
+                con.execute("DELETE FROM documents WHERE active = 0")
+                con.commit()
+                con.close()
             return rc.get(schritt, 0)
         return aufruf
 
@@ -927,7 +942,7 @@ class Index(Basis):
         self.assertFalse(os.path.exists(self.yaml_pfad()))
         code, out, err = self.lauf(auf)
         self.assertEqual(code, 0, err)
-        self.assertEqual(self.calls, [("vault", "update"), ("vault", "embed"), ("vault", "cleanup")])
+        self.assertEqual(self.calls, [("vault", "update"), ("vault", "cleanup"), ("vault", "embed")])
         with open(self.yaml_pfad(), encoding="utf-8") as fh:
             self.assertIn('path: "%s"' % os.path.realpath(self.vault), fh.read())
 
@@ -980,7 +995,7 @@ class Index(Basis):
                      % os.path.realpath(self.vault))
         code, _, err = self.lauf(auf)
         self.assertEqual(code, 0, err)
-        self.assertEqual([c[1] for c in self.calls], ["update", "embed", "cleanup"])
+        self.assertEqual([c[1] for c in self.calls], ["update", "cleanup", "embed"])
         with open(self.yaml_pfad(), encoding="utf-8") as fh:
             self.assertEqual(fh.read(), nb.qmd_yaml(self.vault, nb.einstellungen_laden(os.path.join(self.cfg, "x"))))
 
@@ -993,13 +1008,33 @@ class Index(Basis):
         code, _, err = self.lauf(auf)
         self.assertEqual(code, 0, err)
 
-    def test_index_befund_nach_update_kein_embed(self):
+    def test_index_aktive_ausgeschlossene_zeile_nach_cleanup_kein_embed(self):
         auf = self.aufbau(db_zeilen=[("memory/Omega.md", 1), ("03 Bereiche/Notizen/Kappa.md", 1)])
         code, _, err = self.lauf(auf)
         self.assertEqual(code, 1)
-        self.assertEqual(self.calls, [("vault", "update")])
+        self.assertEqual(self.calls, [("vault", "update"), ("vault", "cleanup")])
         self.assertIn("memory/Omega.md", err)
+        self.assertIn("nach cleanup", err)
         self.assertIn("-wal", err)
+
+    def test_index_inaktive_ausgeschlossene_zeile_cleanup_raeumt_weg(self):
+        # neuer Ausschluss: update setzt die Notiz nur auf active=0, cleanup loescht sie
+        auf = self.aufbau(db_zeilen=[("memory/Omega.md", 0), ("03 Bereiche/Notizen/Kappa.md", 1)])
+        code, _, err = self.lauf(auf)
+        self.assertEqual(code, 0, err)
+        self.assertEqual([c[1] for c in self.calls], ["update", "cleanup", "embed"])
+        self.assertNotIn("neu bauen", err)
+        self.assertNotIn("Omega", err)
+
+    def test_index_inaktive_ausgeschlossene_zeile_uebersteht_cleanup(self):
+        auf = self.aufbau(db_zeilen=[("memory/Omega.md", 0)], cleanup_loescht=False)
+        code, _, err = self.lauf(auf)
+        self.assertEqual(code, 1)
+        self.assertEqual([c[1] for c in self.calls], ["update", "cleanup"])
+        self.assertIn("memory/Omega.md", err)
+        self.assertIn("nach cleanup", err)
+        self.assertIn("-wal", err)
+        self.assertIn("neu", err)
 
     def test_index_python_zu_alt_exit_1_ohne_qmd(self):
         auf = self.aufbau()
@@ -1015,7 +1050,7 @@ class Index(Basis):
         code, _, err = self.lauf(auf)
         self.assertEqual(code, 1)
         self.assertIn("embed", err)
-        self.assertEqual([c[1] for c in self.calls], ["update", "embed"])  # cleanup und Prüfung entfallen
+        self.assertEqual([c[1] for c in self.calls], ["update", "cleanup", "embed"])  # Prüfung nach dem Lauf entfällt
 
     def test_index_befund_im_index_exit_1_mit_liste_und_hinweis(self):
         auf = self.aufbau(db_zeilen=[("memory/Omega.md", 1), ("03 Bereiche/Notizen/Kappa.md", 1)])
@@ -1025,11 +1060,23 @@ class Index(Basis):
         self.assertNotIn("Kappa.md", err)
         self.assertIn("neu", err)
 
-    def test_index_inaktive_zeilen_zaehlen(self):
-        auf = self.aufbau(db_zeilen=[("memory/Omega.md", 0)])
+    def test_index_befund_nach_dem_lauf(self):
+        basis = self.aufbau()
+
+        def auf(index, schritt):
+            rc = basis(index, schritt)
+            if schritt == "embed":  # ausgeschlossene Zeile erst beim letzten Schritt
+                con = sqlite3.connect(self.db)
+                con.execute("INSERT INTO documents (collection, path, title, hash, active) "
+                            "VALUES ('vault', 'memory/Omega.md', 't', 'h', 1)")
+                con.commit()
+                con.close()
+            return rc
         code, _, err = self.lauf(auf)
         self.assertEqual(code, 1)
+        self.assertEqual([c[1] for c in self.calls], ["update", "cleanup", "embed"])
         self.assertIn("memory/Omega.md", err)
+        self.assertIn("nach dem Lauf", err)
 
     def test_index_yaml_befund_vor_qmd_exit_1(self):
         auf = self.aufbau()
@@ -1071,6 +1118,21 @@ class Index(Basis):
         def auf(index, schritt):
             rc = basis(index, schritt)
             if schritt == "cleanup":
+                with open(self.yaml_pfad(), "a") as fh:
+                    fh.write("models:\n  embed: openai:text-embedding-3-small\n")
+            return rc
+        code, _, err = self.lauf(auf)
+        self.assertEqual(code, 1)
+        self.assertEqual([c[1] for c in self.calls], ["update", "cleanup"])  # kein embed
+        self.assertIn("nach cleanup", err)
+        self.assertIn("openai:text-embedding-3-small", err)
+
+    def test_index_fremdmodell_nach_embed_nach_dem_lauf(self):
+        basis = self.aufbau()
+
+        def auf(index, schritt):
+            rc = basis(index, schritt)
+            if schritt == "embed":
                 with open(self.yaml_pfad(), "a") as fh:
                     fh.write("models:\n  embed: openai:text-embedding-3-small\n")
             return rc

@@ -5,7 +5,7 @@ description: >
   on first mentions and proposes new entities and relations.
   Use when the user says "verknuepfen", "link the note", "link entities", "knowledge graph", "new entities",
   "candidates", "interlink", after writing a vault note, and at session end before the daily note.
-version: 1.2.3
+version: 1.2.4
 user-invocable: true
 allowed-tools:
   - Read
@@ -110,7 +110,7 @@ Refresh the index after step 1 (`link`), so the freshly linked notes are in it, 
 python3 -I ~/.claude/skills/verknuepfen/scripts/verknuepfen.py index --vault <vault>
 ```
 
-This writes `~/.config/qmd/<index>.yml` from the settings, runs `qmd update`, `embed` and `cleanup`, then checks the
+This writes `~/.config/qmd/<index>.yml` from the settings, runs `qmd update`, `cleanup` and `embed`, then checks the
 index for excluded paths and foreign collections. The first run is slow (about 24 minutes for 1,300 notes); after
 that only changed notes are processed (seconds). The first run takes longer than the Bash tool's time limit: start it
 in the background or ask the user to start it in a terminal. Then step 4 for each note. If a foreign qmd configuration

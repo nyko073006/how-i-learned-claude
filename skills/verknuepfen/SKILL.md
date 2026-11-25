@@ -6,7 +6,7 @@ description: >
   Verwenden wenn der Nutzer "verknuepfen", "verlinke die notiz", "entitaeten verlinken", "link entities",
   "knowledge graph", "neue entitaeten", "kandidaten", "link note", "interlink" sagt, nach dem Schreiben
   einer Vault-Notiz und am Session-Ende vor der Daily Note.
-version: 1.2.3
+version: 1.2.4
 user-invocable: true
 allowed-tools:
   - Read
@@ -113,7 +113,7 @@ Den Index nach Schritt 1 (`link`) auffrischen, damit die frisch verlinkten Notiz
 python3 -I ~/.claude/skills/verknuepfen/scripts/verknuepfen.py index --vault <Vault>
 ```
 
-Das schreibt `~/.config/qmd/<index>.yml` aus den Einstellungen, ruft `qmd update`, `embed` und `cleanup` und prueft den
+Das schreibt `~/.config/qmd/<index>.yml` aus den Einstellungen, ruft `qmd update`, `cleanup` und `embed` und prueft den
 Index danach auf ausgeschlossene Pfade und fremde Collections. Der erste Lauf dauert lange (rund 24 Minuten fuer 1.300
 Notizen), laenger als die Frist des Bash-Werkzeugs: den ersten Lauf im Hintergrund starten oder den Nutzer bitten, ihn
 im Terminal zu starten. Danach nur geaenderte Notizen (Sekunden). Erst dann Schritt 4 je Notiz. Liegt unter dem Namen

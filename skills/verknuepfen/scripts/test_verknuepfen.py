@@ -453,6 +453,73 @@ print(open(p, encoding="utf-8").read() == old)
             self.assertEqual(fh.read(), FM + "[[Kappa]]\n\nund [[Rho GmbH|Rho]].\n")
 
 
+class RelPfad(Basis):
+    """_rel: relative Pfade werden normalisiert (./, //, /./, ..), Ausbruch aus dem Vault bleibt abgelehnt."""
+
+    def vault(self, extra=None):
+        files = {NOTIZ: FM + "Kappa\n", NB + "A.md": "Tau GmbH, Pi GmbH.\n", NB + "B.md": "Tau GmbH.\n"}
+        files.update(extra or {})
+        d = self.bau(files)
+        return d, vk.load_vault(d)
+
+    def test_rel_normalisiert_relative_pfade(self):
+        _, v = self.vault()
+        for roh in ("./" + NOTIZ, "03 Bereiche/./Notizen/Test.md", "03 Bereiche//Notizen/Test.md",
+                    "03 Bereiche/x/../Notizen/Test.md", "././" + NOTIZ, NOTIZ):
+            with self.subTest(roh):
+                self.assertEqual(vk._rel(v, roh), NOTIZ)
+
+    def test_rel_ausbruch_bleibt_abgelehnt(self):
+        d, v = self.vault()
+        for roh in ("../" + NOTIZ, "03 Bereiche/../../" + NOTIZ, "./../" + NOTIZ,
+                    "../" + os.path.basename(d) + "/" + NOTIZ):
+            with self.subTest(roh):
+                self.assertIsNone(vk._rel(v, roh))
+
+    def test_rel_absolut_und_unbekannt_wie_vorher(self):
+        d, v = self.vault()
+        self.assertEqual(vk._rel(v, os.path.join(d, NOTIZ)), NOTIZ)
+        self.assertIsNone(vk._rel(v, "/gibt/es/nicht.md"))
+        self.assertIsNone(vk._rel(v, "gibt/es/nicht.md"))
+        self.assertIsNone(vk._rel(v, "./gibt/es/nicht.md"))
+
+    def test_rel_nfd_mit_punkt_schraegstrich(self):
+        rel = unicodedata.normalize("NFC", "03 Bereiche/Notizen/Bär.md")
+        _, v = self.vault({rel: "x\n"})
+        self.assertEqual(vk._rel(v, "./" + unicodedata.normalize("NFD", rel)), rel)
+
+    def test_rel_relativ_gilt_zum_vault_nicht_zum_arbeitsverzeichnis(self):
+        d, v = self.vault()
+        alt = os.getcwd()
+        os.chdir(os.path.join(d, "03 Bereiche"))
+        self.addCleanup(os.chdir, alt)
+        self.assertEqual(vk._rel(v, "./" + NOTIZ), NOTIZ)
+        self.assertIsNone(vk._rel(v, "./Notizen/Test.md"))
+
+    def test_cli_link_mit_punkt_schraegstrich(self):
+        d, _ = self.vault()
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()) as err:
+            code = vk.main(["link", "--vault", d, "--dry-run", "./" + NOTIZ])
+        self.assertEqual(code, 0, err.getvalue())
+
+    def test_cli_kandidaten_mit_punkt_schraegstrich(self):
+        d, _ = self.vault()
+        err = io.StringIO()
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+            code = vk.main(["kandidaten", "--vault", d, "--notiz", "./" + NB + "B.md"])
+        self.assertEqual(code, 0, err.getvalue())
+
+    def test_cli_ausbruch_wird_gemeldet(self):
+        d, _ = self.vault()
+        for argv in (["link", "--vault", d, "--dry-run", "../" + NOTIZ],
+                     ["kandidaten", "--vault", d, "--notiz", "../" + NOTIZ]):
+            with self.subTest(argv[0]):
+                err = io.StringIO()
+                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+                    self.assertEqual(vk.main(argv), 1)
+                self.assertIn("Notiz nicht im Vault", err.getvalue())
+
+
 # --- Je Schutzregel ein Fall: geschuetzte Erwaehnung bleibt, die zweite, freie wird verlinkt ---
 SCHUTZ = {
     "frontmatter": ("---\ntags: [test]\nbeschreibung: Kappa\n---\n", ""),
@@ -987,6 +1054,36 @@ class VaultAusEinstellungen(Basis):
                 self.assertEqual(r.returncode, 2, r.stderr)
                 self.assertIn(pfad, r.stderr)
                 self.assertIn(text, r.stderr)
+                self.assertNotIn("Traceback", r.stderr)
+
+    def test_falscher_typ_exit2(self):
+        v = self.bau({NOTIZ: FM + "Kappa hier.\n"})
+        for schluessel in ("vault", "dienst_ordner"):
+            for wert in (5, ["a"], {"a": 1}, True):
+                with self.subTest(schluessel=schluessel, wert=wert):
+                    r, pfad, d = self.cli("verknuepfen.py", ["link", "--dry-run", "--alle", "--vault", v],
+                                          einst=json.dumps({schluessel: wert}))
+                    self.assertEqual(r.returncode, 2, r.stderr)
+                    self.assertIn(schluessel, r.stderr)
+                    self.assertIn("String", r.stderr)
+                    self.assertIn(pfad, r.stderr)
+                    self.assertNotIn("Traceback", r.stderr)
+
+    def test_richtiger_typ_bleibt_gruen(self):
+        v = self.bau({NOTIZ: FM + "Kappa hier.\n"})
+        for einst in ({"vault": v, "dienst_ordner": DIENST}, {"dienst_ordner": ""}):
+            r, _, _ = self.cli("verknuepfen.py", ["link", "--dry-run", "--alle", "--vault", v],
+                               einst=json.dumps(einst))
+            self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_eichen_falscher_typ_exit2(self):
+        v = self.bau({NOTIZ: FM + "Kappa hier.\n"})
+        for schluessel in ("vault", "dienst_ordner"):
+            with self.subTest(schluessel=schluessel):
+                r, pfad, _ = self.cli("eichen.py", ["--vault", v, "liste.md"], einst=json.dumps({schluessel: 5}))
+                self.assertEqual(r.returncode, 2, r.stderr)
+                self.assertIn(schluessel, r.stderr)
+                self.assertIn(pfad, r.stderr)
                 self.assertNotIn("Traceback", r.stderr)
 
     def test_vault_aus_einstellung(self):
