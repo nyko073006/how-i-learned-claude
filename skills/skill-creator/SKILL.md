@@ -1,6 +1,6 @@
 ---
 name: skill-creator
-version: 1.3.1
+version: 1.3.2
 description: >
   Veroeffentlicht einen Claude-Skill in einem Durchgang ueber alle Ebenen des
   Skill-Lifecycles: lokal (Version bumpen), GitHub (spiegeln und committen), Vault
@@ -74,7 +74,7 @@ Nach JEDER Skill-Erstellung oder -Aenderung ausfuehren. Vorher immer einmal mit
 | `--no-version-bump` | Version bleibt unveraendert — fuer die Erstveroeffentlichung |
 | `--dry-run` | Zeigt alle geplanten Aenderungen, schreibt nichts. Kein Commit, kein Push, keine Datei |
 | `--create-remote` | Legt das GitHub-Repo per `gh repo create` an. Default: AUS. Nur mit expliziter Zustimmung des Nutzers setzen |
-| `--pruefe-oeffentlich` | Ohne Skill und `-m`: prueft alle Dateien unter `<oeffentlich_repo>/skills/` (ohne Ausschluesse, auch Logs und Caches) gegen die Sperrliste und meldet Ordner, die nicht in `oeffentlich` stehen, als verwaist. Dazu die noch nicht gepushten Commits (`@{u}..HEAD`): Ordner unter `skills/` ("verwaist in Historie"), jede dort geaenderte Datei und jede Commit-Nachricht. Ohne Upstream nur der Arbeitsbaum, mit Hinweis. Exit 0 sauber, 2 bei Treffern oder fehlender Einstellung |
+| `--pruefe-oeffentlich` | Ohne Skill und `-m`: prueft alle Dateien unter `<oeffentlich_repo>/skills/` (ohne Ausschluesse, auch Logs und Caches) gegen die Sperrliste und meldet Ordner, die nicht in `oeffentlich` stehen, als verwaist. Dazu die noch nicht gepushten Commits (`@{u}..HEAD`): Ordner unter `skills/` ("verwaist in Historie"), jede dort geaenderte Datei und jede Commit-Nachricht. Ohne Upstream nur der Arbeitsbaum, mit Hinweis. Exit 0 sauber, 2 bei Treffern oder fehlender Einstellung oder fehlendem `skills/` (ohne Ausnahme, auch im Repo ohne Commit; die Erstlauf-Ausnahme gilt nur im Normallauf beim allerersten Lauf) |
 | `--skills-dir`, `--repo-dir`, `--vault-dir` | Pfade ueberschreiben (Default: `~/.claude/skills`, `skill_repo`, `vault`) |
 
 ## Tests

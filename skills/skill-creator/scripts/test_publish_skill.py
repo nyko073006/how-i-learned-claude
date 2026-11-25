@@ -780,6 +780,142 @@ class CliTest(Basis):
         self.assertIn("version: 1.0.0", (src / "SKILL.md").read_text(encoding="utf-8"))
         self.assertEqual(git(privat, "log", "--oneline", "--all").strip(), "")
 
+    # --- skills/ im oeffentlichen Repo fehlt -------------------------------------------------
+
+    def repo_mit_historie(self, name="oeff"):
+        """Wegwerf-Repo mit einem Commit, aber ohne skills/ (Pfad falsch oder Ordner verschwunden)."""
+        repo = self.repo(name)
+        self.datei(f"{name}/README.md", "x\n")
+        git(repo, "add", "-A")
+        git(repo, "commit", "-q", "-m", "start")
+        return repo
+
+    def einrichten_ohne_skills(self, liste=("demo",)):
+        privat = self.repo("privat")
+        repo = self.repo_mit_historie()
+        sperr = self.datei("sperrliste.txt", LISTE_TEXT)
+        vault = self.tmp / "vault"
+        self.schreibe_einstellungen({"skill_repo": str(privat), "oeffentlich": list(liste),
+                                     "oeffentlich_repo": str(repo), "sperrliste": str(sperr),
+                                     "vault": str(vault)})
+        (vault / ps.DOC_SUBDIR).mkdir(parents=True)
+        return privat, repo, vault
+
+    def test_fehlendes_skills_im_oeffentlichen_repo_vor_jedem_schreiben(self):
+        privat, repo, vault = self.einrichten_ohne_skills()
+        kopf = git(repo, "rev-parse", "HEAD")
+        src = self.skill()
+        code, _, err = self.lauf(["demo", "-m", "neu", "--skills-dir", str(src.parent)])
+        self.assertEqual(code, 2)
+        self.assertIn(str(repo), err)
+        self.assertIn("skills/", err)
+        self.assertIn("version: 1.0.0", (src / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertEqual(git(privat, "log", "--oneline", "--all").strip(), "")
+        self.assertFalse((privat / "demo").exists())
+        self.assertEqual(list((vault / ps.DOC_SUBDIR).iterdir()), [])
+        self.assertEqual(git(repo, "rev-parse", "HEAD"), kopf)
+        self.assertFalse((repo / "skills").exists())
+
+    def test_skills_ist_datei_im_oeffentlichen_repo_exit2(self):
+        privat, repo, _ = self.einrichten_ohne_skills()
+        self.datei("oeff/skills", "keine Ordner\n")
+        src = self.skill()
+        code, _, err = self.lauf(["demo", "-m", "neu", "--skills-dir", str(src.parent)])
+        self.assertEqual(code, 2)
+        self.assertIn(str(repo), err)
+        self.assertIn("version: 1.0.0", (src / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertEqual(git(privat, "log", "--oneline", "--all").strip(), "")
+
+    def test_pruefe_oeffentlich_ohne_skills_exit2_statt_sauber(self):
+        _, repo, _ = self.einrichten_ohne_skills()
+        code, out, err = self.lauf(["--pruefe-oeffentlich"])
+        self.assertEqual(code, 2)
+        self.assertIn(str(repo), err)
+        self.assertNotIn("0 Treffer", out)
+
+    def test_nicht_oeffentlicher_skill_laeuft_ohne_skills_im_oeffentlichen_repo(self):
+        privat, repo, _ = self.einrichten_ohne_skills(liste=("anderer",))
+        kopf = git(repo, "rev-parse", "HEAD")
+        src = self.skill()
+        code, out, _ = self.lauf(["demo", "-m", "neu", "--skills-dir", str(src.parent)])
+        self.assertEqual(code, 0)
+        self.assertNotIn("Öffentlich", out)
+        self.assertEqual(git(privat, "log", "-1", "--format=%s").strip(), "demo: neu")
+        self.assertEqual(git(repo, "rev-parse", "HEAD"), kopf)
+        self.assertFalse((repo / "skills").exists())
+
+    def einrichten_leeres_repo(self, repo_ordner="oeff"):
+        """Oeffentliches Repo ohne einen Commit (Erstlauf) und ohne skills/."""
+        privat = self.repo("privat")
+        repo = self.repo(repo_ordner)
+        sperr = self.datei("sperrliste.txt", LISTE_TEXT)
+        self.schreibe_einstellungen({"skill_repo": str(privat), "oeffentlich": ["demo"],
+                                     "oeffentlich_repo": str(repo), "sperrliste": str(sperr)})
+        return privat, repo
+
+    def test_pruefe_oeffentlich_leeres_repo_ohne_skills_exit2(self):
+        _, repo = self.einrichten_leeres_repo()
+        code, out, err = self.lauf(["--pruefe-oeffentlich"])
+        self.assertEqual(code, 2)
+        self.assertIn(str(repo), err)
+        self.assertNotIn("0 Treffer", out)
+        self.assertNotIn("nichts geschrieben", err.lower())  # die Pruefung schreibt nie
+
+    def test_pruefe_oeffentlich_ordner_ohne_git_ohne_skills_exit2(self):
+        sperr = self.datei("sperrliste.txt", LISTE_TEXT)
+        (self.tmp / "oeff").mkdir()
+        self.schreibe_einstellungen({"oeffentlich": ["demo"], "oeffentlich_repo": str(self.tmp / "oeff"),
+                                     "sperrliste": str(sperr)})
+        code, out, err = self.lauf(["--pruefe-oeffentlich"])
+        self.assertEqual(code, 2)
+        self.assertIn(str(self.tmp / "oeff"), err)
+        self.assertNotIn("0 Treffer", out)
+
+    def test_skills_ist_datei_im_repo_ohne_commit_exit2(self):  # kein Erstlauf, wenn skills etwas anderes ist
+        privat, repo = self.einrichten_leeres_repo()
+        self.datei("oeff/skills", "keine Ordner\n")
+        src = self.skill()
+        code, _, err = self.lauf(["demo", "-m", "neu", "--skills-dir", str(src.parent)])
+        self.assertEqual(code, 2)
+        self.assertIn("kein Ordner", err)
+        self.assertIn("version: 1.0.0", (src / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertEqual(git(privat, "log", "--oneline", "--all").strip(), "")
+
+    def test_skills_ist_kaputter_link_im_repo_ohne_commit_exit2(self):
+        privat, repo = self.einrichten_leeres_repo()
+        os.symlink("/nicht/da", repo / "skills")
+        src = self.skill()
+        code, _, err = self.lauf(["demo", "-m", "neu", "--skills-dir", str(src.parent)])
+        self.assertEqual(code, 2)
+        self.assertIn("kein Ordner", err)
+        self.assertIn("version: 1.0.0", (src / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertEqual(git(privat, "log", "--oneline", "--all").strip(), "")
+
+    def test_kaputtes_git_im_oeffentlichen_repo_ist_kein_erstlauf(self):
+        privat, repo = self.einrichten_leeres_repo()
+        (repo / ".git" / "HEAD").write_text("kaputt\n", encoding="utf-8")
+        src = self.skill()
+        code, _, err = self.lauf(["demo", "-m", "neu", "--skills-dir", str(src.parent)])
+        self.assertEqual(code, 2)
+        self.assertIn(str(repo), err)
+        self.assertIn("version: 1.0.0", (src / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertEqual(git(privat, "log", "--oneline", "--all").strip(), "")
+        self.assertFalse((repo / "skills").exists())
+
+    def test_normallauf_mit_historie_und_skills_laeuft(self):  # Gegenstueck zum fehlenden skills/
+        privat, repo, _ = self.einrichten_ohne_skills()
+        self.datei("oeff/skills/.gitkeep", "")
+        git(repo, "add", "-A")
+        git(repo, "commit", "-q", "-m", "skills")
+        src = self.skill()
+        code, out, _ = self.lauf(["demo", "-m", "neu", "--skills-dir", str(src.parent)])
+        self.assertEqual(code, 0)
+        self.assertEqual(git(repo, "log", "-1", "--format=%s").strip(), "skills/demo: neu")
+        self.assertEqual(git(privat, "log", "-1", "--format=%s").strip(), "demo: neu")
+
+    # Gegenstueck skills/ vorhanden: test_normalaufruf_mit_oeffentlichem_schritt (Erstlauf, leeres Repo
+    # ohne Commit) und test_cli_pruefe_oeffentlich_exit2_bei_treffer (vorhandenes skills/).
+
 
 if __name__ == "__main__":
     unittest.main()

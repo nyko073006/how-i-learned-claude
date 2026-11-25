@@ -710,6 +710,39 @@ def spiegle_oeffentlich(src: Path, repo: Path, skill: str, liste, message: str, 
     return result
 
 
+def pruefe_skills_ordner(repo: Path, normallauf: bool) -> None:
+    """EinstellungsFehler, wenn <repo>/skills/ fehlt oder kein Ordner ist. Die eine Stelle fuer diese
+    Bedingung: Spiegel (Vorabpruefung, normallauf=True) und --pruefe-oeffentlich (False) nutzen sie
+    beide; eine Pruefung ohne skills/ prueft nichts und darf nicht 'sauber' melden."""
+    basis = repo / "skills"
+    if basis.is_dir():
+        return
+    nachsatz = " Nichts geschrieben." if normallauf else ""
+    if basis.exists() or basis.is_symlink():
+        raise EinstellungsFehler(
+            f"'{basis}' ist kein Ordner (Datei oder kaputter Link); oeffentlich_repo in "
+            f"{einstellungen_pfad()}. Eintrag entfernen oder verschieben und skills/ als Ordner anlegen.{nachsatz}"
+        )
+    if normallauf:
+        # ASSUMPTION: Ein Repo ohne einen einzigen Commit ist die Erstveroeffentlichung (der Spiegel legt
+        # skills/ dann an); die Bestandstests und der erste Lauf brauchen das. Nur Rueckgabewert 1 von
+        # 'rev-parse --verify -q HEAD' heisst "HEAD zeigt auf nichts" (gemessen: leeres Repo 1, kein oder
+        # kaputtes Git 128); jeder andere Wert ist ein Git-Fehler und bricht ab. --pruefe-oeffentlich
+        # kennt keine Ausnahme: dort braucht sie kein Test, und eine Pruefung ohne Ziel meldet nie sauber.
+        rc = run_git(repo, ["rev-parse", "--verify", "-q", "HEAD"], check=False).returncode
+        if rc == 1:
+            return
+        if rc != 0:
+            raise EinstellungsFehler(
+                f"git im oeffentlichen Repo '{repo}' antwortet mit Fehler (Rueckgabewert {rc}); "
+                f"oeffentlich_repo in {einstellungen_pfad()} pruefen.{nachsatz}"
+            )
+    raise EinstellungsFehler(
+        f"Im oeffentlichen Repo '{repo}' fehlt der Ordner 'skills/' (oeffentlich_repo in "
+        f"{einstellungen_pfad()}). Pfad korrigieren oder skills/ im Repo anlegen.{nachsatz}"
+    )
+
+
 def pruefe_oeffentlich(repo: Path, erlaubt, liste) -> list[str]:
     """Treffer ueber alle Dateien unter repo/skills/ plus "verwaist: skills/<x>" fuer
     Ordner, die nicht in 'erlaubt' stehen. Lose Dateien in skills/ werden nur geprueft."""
@@ -1110,6 +1143,7 @@ def pruefe_oeffentlich_cli() -> int:
         raise EinstellungsFehler(f"Oeffentliches Repo '{repo}' existiert nicht.")
     erlaubt = oeffentlich_liste(einst)
     liste = lade_sperrliste(einst)
+    pruefe_skills_ordner(repo, normallauf=False)
     treffer = pruefe_oeffentlich(repo, erlaubt, liste)
     historie, hinweis = pruefe_historie(repo, erlaubt, liste)
     treffer += historie
@@ -1185,6 +1219,10 @@ def _main(argv=None) -> int:
             f"Oeffentliches Repo '{oeff_repo}' ist kein git-Repo (oeffentlich_repo in {einstellungen_pfad()}); "
             "nichts geschrieben."
         )
+    # ASSUMPTION: Nur ein oeffentlich gespiegelter Skill braucht skills/; alle anderen laufen wie bisher,
+    # weil sie das oeffentliche Repo nie anfassen.
+    if oeffentlich:
+        pruefe_skills_ordner(oeff_repo, normallauf=True)
     # Symlinks in den Spiegelzielen sperren den Spiegel; deshalb hier und nicht erst in Schritt 3/6.
     pruefe_symlinks(repo_dir, repo_dir / skill)
     if oeffentlich:

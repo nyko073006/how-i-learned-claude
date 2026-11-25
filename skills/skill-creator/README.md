@@ -27,7 +27,7 @@ mkdir -p ~/.config/claude-skills
 cp -n how-i-learned-claude/skills/einstellungen.beispiel.json ~/.config/claude-skills/einstellungen.json
 ```
 
-`cp -n` laesst eine vorhandene Datei unberuehrt. In der Vorlage sind die meisten Werte leer (`""` oder `[]`), vorbelegt sind nur `repo_wurzeln` und `sperrliste`; ein leerer Wert wirkt wie ein fehlender. Danach eigene Werte eintragen: `skill_repo` (Pfad des privaten Skill-Repos, Pflicht), `vault` (eigener Vault-Pfad), bei Bedarf `skill_remote`, `oeffentlich`, `oeffentlich_repo` und `sperrliste` (Tabelle unten).
+`cp -n` laesst eine vorhandene Datei unberuehrt. In der Vorlage sind die meisten Werte leer (`""` oder `[]`), vorbelegt sind nur `repo_wurzeln` und `sperrliste`; ein leerer Wert wirkt wie ein fehlender (Ausnahme `repo_wurzeln`: eine leere Liste `[]` ist ein Fehler, der Schluessel darf aber fehlen). Danach eigene Werte eintragen: `skill_repo` (Pfad des privaten Skill-Repos, Pflicht), `vault` (eigener Vault-Pfad), bei Bedarf `skill_remote`, `oeffentlich`, `oeffentlich_repo` und `sperrliste` (Tabelle unten).
 
 | Schluessel | Bedeutung |
 |------------|-----------|
@@ -76,7 +76,7 @@ python3 ~/.claude/skills/skill-creator/scripts/publish_skill.py --pruefe-oeffent
 | `--no-version-bump` | Version bleibt, fuer die Erstveroeffentlichung. |
 | `--dry-run` | Zeigt alle geplanten Aenderungen, schreibt nichts. |
 | `--create-remote` | Legt das GitHub-Repo per `gh repo create` an. Vorgabe aus, nur mit ausdruecklicher Zustimmung. Ohne `skill_remote` und ohne `origin` Exit 2 vor jedem Schreiben. |
-| `--pruefe-oeffentlich` | Ohne Skill und `-m`: prueft alle Dateien unter `<oeffentlich_repo>/skills/` gegen die Sperrliste und meldet verwaiste Ordner; dazu die noch nicht gepushten Commits (`@{u}..HEAD`: Ordner, geaenderte Dateien unter `skills/`, Commit-Nachrichten). Ohne Upstream nur der Arbeitsbaum, mit Hinweis. Exit 0 sauber, 2 bei Treffern oder fehlender Einstellung. |
+| `--pruefe-oeffentlich` | Ohne Skill und `-m`: prueft alle Dateien unter `<oeffentlich_repo>/skills/` gegen die Sperrliste und meldet verwaiste Ordner; dazu die noch nicht gepushten Commits (`@{u}..HEAD`: Ordner, geaenderte Dateien unter `skills/`, Commit-Nachrichten). Ohne Upstream nur der Arbeitsbaum, mit Hinweis. Exit 0 sauber, 2 bei Treffern oder fehlender Einstellung oder fehlendem `skills/` (ohne Ausnahme, auch im Repo ohne Commit; die Erstlauf-Ausnahme gilt nur im Normallauf beim allerersten Lauf). |
 | `--skills-dir`, `--repo-dir`, `--vault-dir` | Pfade ueberschreiben. |
 
 ## Sperrlisten-Pruefung
