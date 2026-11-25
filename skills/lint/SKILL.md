@@ -9,7 +9,7 @@ description: >
   Verwenden wenn der Nutzer "lint", "vault check", "pruefe das vault", "gesundheitscheck",
   "verwaiste notizen", "orphans", "projekt-compliance", "projekt-check", "graph-check",
   "unverlinkte erwaehnungen", "entitaeten pruefen" sagt.
-version: 1.7.4
+version: 1.7.5
 user-invocable: true
 allowed-tools:
   - Read

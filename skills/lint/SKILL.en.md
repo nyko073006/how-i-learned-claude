@@ -8,7 +8,7 @@ description: >
   and suggests fixes.
   Use when the user says "lint", "vault check", "check the vault", "health check",
   "orphans", "project-compliance", "project-check", "graph check", "unlinked mentions".
-version: 1.7.4
+version: 1.7.5
 user-invocable: true
 allowed-tools:
   - Read

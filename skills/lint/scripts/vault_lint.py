@@ -52,10 +52,30 @@ def einstellungen(pfad=None):
     return daten
 
 
+def _string_pruefen(schluessel, wert):
+    """Vorhandener Wert muss ein String sein; sonst EinstellungsFehler mit Schluessel, Typen und Pfad.
+    ASSUMPTION: null zaehlt wie ein fehlender Schluessel, weil JSON null "kein Wert" bedeutet."""
+    if wert is not None and not isinstance(wert, str):
+        raise EinstellungsFehler("Einstellung `%s` in %s muss ein String sein, gefunden: %s"
+                                 % (schluessel, einstellungen_pfad(), _typname(wert)))
+
+
+def _typname(wert):
+    return {bool: "Wahrheitswert", int: "Zahl", float: "Zahl", list: "Liste", dict: "Objekt"}.get(type(wert), type(wert).__name__)
+
+
 def vault_vorgabe():
-    """Wert vault aus den Einstellungen oder None."""
+    """Wert vault aus den Einstellungen oder None. Vorhanden, aber kein String: EinstellungsFehler."""
     v = einstellungen().get("vault")
+    _string_pruefen("vault", v)
     return v if isinstance(v, str) and v.strip() else None
+
+
+def einstellungen_vorab_pruefen():
+    """Einstellungsdatei vor der Arbeit einmal pruefen (vault, dienst_ordner): Fehler als Klartext
+    (EinstellungsFehler), nicht mitten im Lauf. Einzige Stelle fuer lint, verknuepfen und eichen."""
+    vault_vorgabe()  # auch mit --vault: ein falscher Typ in der Datei wird nie still uebergangen
+    dienst_ordner()
 
 
 def vault_waehlen(arg):
@@ -330,6 +350,7 @@ RELATIONS = ("kunde_von", "nutzt", "entschieden_in")
 def dienst_ordner():
     """Einstellung dienst_ordner (Vault-relativ) ohne / am Ende; Vorgabe "", dann ist nichts dienstlich."""
     d = einstellungen().get("dienst_ordner")
+    _string_pruefen("dienst_ordner", d)
     return nfc(d.strip()).rstrip("/") if isinstance(d, str) else ""
 
 
@@ -912,8 +933,8 @@ def main(argv=None):
     ap.add_argument("--teil", default="alles", choices=["alles", "orphans", "inbox", "projekte", "index", "graph"])
     a = ap.parse_args(argv)
     try:
+        einstellungen_vorab_pruefen()
         vault = vault_waehlen(a.vault)
-        dienst_ordner()  # Einstellungsdatei einmal vorab pruefen: Fehler als Klartext, nicht mitten im Lauf
     except EinstellungsFehler as ex:
         print(ex, file=sys.stderr)
         return 2

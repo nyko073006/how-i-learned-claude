@@ -699,6 +699,36 @@ class Cli(unittest.TestCase):
             self.assertIn("nicht lesbar", r.stderr)
             self.assertNotIn("Traceback", r.stderr)
 
+    def test_cli_falscher_typ_exit2(self):
+        v = tempfile.mkdtemp(prefix="vault-lint-cli-vault-")
+        self.addCleanup(shutil.rmtree, v)
+        for schluessel in ("vault", "dienst_ordner"):
+            for wert in (5, ["a"], {"a": 1}, True):
+                with self.subTest(schluessel=schluessel, wert=wert):
+                    r, pfad, _ = self.lauf("--vault", v, einst=json.dumps({schluessel: wert}))
+                    self.assertEqual(r.returncode, 2, r.stderr)
+                    self.assertIn(schluessel, r.stderr)
+                    self.assertIn("String", r.stderr)
+                    self.assertIn(pfad, r.stderr)
+                    self.assertNotIn("Traceback", r.stderr)
+                    self.assertEqual(r.stdout, "")
+
+    def test_cli_richtiger_typ_bleibt_gruen(self):
+        v = tempfile.mkdtemp(prefix="vault-lint-cli-vault-")
+        self.addCleanup(shutil.rmtree, v)
+        for einst in ({"vault": v, "dienst_ordner": DIENST}, {"dienst_ordner": ""}):
+            r, _, _ = self.lauf("--vault", v, einst=json.dumps(einst))
+            self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_cli_null_zaehlt_wie_fehlend(self):
+        v = tempfile.mkdtemp(prefix="vault-lint-cli-vault-")
+        self.addCleanup(shutil.rmtree, v)
+        r, _, _ = self.lauf("--vault", v, einst=json.dumps({"vault": None, "dienst_ordner": None}))
+        self.assertEqual(r.returncode, 0, r.stderr)
+        r, pfad, _ = self.lauf(einst=json.dumps({"vault": None}))   # ohne --vault: wie fehlender Schluessel
+        self.assertEqual(r.returncode, 2, r.stderr)
+        self.assertIn("Vault-Pfad fehlt", r.stderr)
+
     def test_cli_vault_aus_einstellung(self):
         v = tempfile.mkdtemp(prefix="vault-lint-cli-vault-")
         self.addCleanup(shutil.rmtree, v)
